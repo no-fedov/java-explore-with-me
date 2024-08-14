@@ -102,7 +102,7 @@ public class StatClient {
         String path = stringBuilder.toString();
         return path.substring(0, path.length() - 1);
     }
-//оставил для проверки клиента
+    //оставил для проверки клиента
     public static void main(String[] args) {
         StatClient statClient = new StatClient("http://localhost:9090", new RestTemplateBuilder());
 //        EndpointHit endpointHit = EndpointHit.builder()
