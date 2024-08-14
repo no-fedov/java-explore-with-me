@@ -82,10 +82,10 @@ public class StatClient {
 
     public static Map<String, Object> buildParametersForUri(URLParameter urlParameter) {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", urlParameter.getStart().format(DateTimeFormatter.
-                ofPattern("yyyy-MM-dd HH:mm:ss")));
-        parameters.put("end", urlParameter.getEnd().format(DateTimeFormatter.
-                ofPattern("yyyy-MM-dd HH:mm:ss")));
+        parameters.put("start", urlParameter.getStart().format(DateTimeFormatter
+                .ofPattern("yyyy-MM-dd HH:mm:ss")));
+        parameters.put("end", urlParameter.getEnd().format(DateTimeFormatter
+                .ofPattern("yyyy-MM-dd HH:mm:ss")));
         if (urlParameter.getUris() != null) {
             parameters.put("uris", String.join(",", urlParameter.getUris()));
         }
@@ -102,7 +102,7 @@ public class StatClient {
         String path = stringBuilder.toString();
         return path.substring(0, path.length() - 1);
     }
-
+//оставил для проверки клиента
     public static void main(String[] args) {
         StatClient statClient = new StatClient("http://localhost:9090", new RestTemplateBuilder());
 //        EndpointHit endpointHit = EndpointHit.builder()
@@ -112,14 +112,13 @@ public class StatClient {
 //                .uri("dfsg>ddsgsdg")
 //                .build();
         URLParameter unique = URLParameter.builder()
-                .start(LocalDateTime.parse("2024-08-13 08:41:45", DateTimeFormatter.
-                        ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .start(LocalDateTime.parse("2024-08-13 08:41:45",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .end(LocalDateTime.now())
                 .uris(List.of("/events/2", "/events/1"))
                 .unique(Boolean.FALSE).build();
 
-        System.out.println(unique.getStart().format(DateTimeFormatter.
-                ofPattern("yyyy-MM-dd HH:mm:ss")));
+        System.out.println(unique.getStart().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         Map<String, Object> map = buildParametersForUri(unique);
 
