@@ -21,7 +21,6 @@ import java.util.Map;
 public class StatClient {
     private static final String HIT = "/hit";
     private static final String STATS = "/stats";
-    private static final String param = "?start={start}&end={end}&unique={unique}";
 
     private final RestTemplate rest;
 
