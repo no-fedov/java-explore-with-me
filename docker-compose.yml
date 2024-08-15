@@ -30,7 +30,6 @@ services:
       - POSTGRES_PASSWORD=test
 
   ewm-service:
-    build: ./main-service
     ports:
       - "8080:8080"
 
