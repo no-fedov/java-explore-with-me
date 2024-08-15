@@ -19,8 +19,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @RequiredArgsConstructor
 public class HitController {
 
-    private static final DateTimeFormatter timeFormat = DateTimeFormatter.
-            ofPattern(URLDecoder.decode("yyyy-MM-dd HH:mm:ss", UTF_8));
+    private static final DateTimeFormatter timeFormat = DateTimeFormatter
+            .ofPattern(URLDecoder.decode("yyyy-MM-dd HH:mm:ss", UTF_8));
 
     private final HitService hitService;
 

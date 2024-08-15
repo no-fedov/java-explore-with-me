@@ -27,6 +27,7 @@ services:
       - POSTGRES_PASSWORD=test
 
   ewm-service:
+    image: ubuntu
     ports:
       - "8080:8080"
 

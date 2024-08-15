@@ -12,9 +12,6 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.URLParameter;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,10 +33,9 @@ public class StatClient {
     }
 
     public ResponseEntity<Object> get(URLParameter urlParameter) {
-        Map<String, Object> parameters = buildParametersForUri(urlParameter);
-        return makeAndSendRequest(HttpMethod.GET, STATS + pathBuilderForUris(parameters), parameters, null);
+        Map<String, Object> parameters = PathBuilder.buildParameters(urlParameter);
+        return makeAndSendRequest(HttpMethod.GET, STATS + PathBuilder.buildPath(parameters), parameters, null);
     }
-
 
     private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method,
                                                           String path,
@@ -77,51 +73,5 @@ public class StatClient {
             return responseBuilder.body(response.getBody());
         }
         return responseBuilder.build();
-    }
-
-    public static Map<String, Object> buildParametersForUri(URLParameter urlParameter) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("start", urlParameter.getStart().format(DateTimeFormatter
-                .ofPattern("yyyy-MM-dd HH:mm:ss")));
-        parameters.put("end", urlParameter.getEnd().format(DateTimeFormatter
-                .ofPattern("yyyy-MM-dd HH:mm:ss")));
-        if (urlParameter.getUris() != null) {
-            parameters.put("uris", String.join(",", urlParameter.getUris()));
-        }
-        parameters.put("unique", urlParameter.getUnique());
-        return parameters;
-    }
-
-    public static String pathBuilderForUris(Map<String, Object> parameters) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("?");
-        for (String key : parameters.keySet()) {
-            stringBuilder.append(key).append("={" + key + "}").append("&");
-        }
-        String path = stringBuilder.toString();
-        return path.substring(0, path.length() - 1);
-    }
-
-    public static void main(String[] args) {
-        StatClient statClient = new StatClient("http://localhost:9090", new RestTemplateBuilder());
-//        EndpointHit endpointHit = EndpointHit.builder()
-//                .app("dsfsdfsdf")
-//                .ip("sdsdfsdf")
-//                .timestamp(LocalDateTime.now())
-//                .uri("dfsg>ddsgsdg")
-//                .build();
-        URLParameter unique = URLParameter.builder()
-                .start(LocalDateTime.parse("2024-08-13 08:41:45",
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                .end(LocalDateTime.now())
-                .uris(List.of("/events/2", "/events/1"))
-                .unique(Boolean.FALSE).build();
-
-        System.out.println(unique.getStart().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-
-        Map<String, Object> map = buildParametersForUri(unique);
-
-        System.out.println(pathBuilderForUris(map));
-        System.out.println(statClient.get(unique));
     }
 }
