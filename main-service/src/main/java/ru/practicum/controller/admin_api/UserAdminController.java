@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +13,12 @@ import ru.practicum.service.UserService;
 
 import java.util.List;
 
+import static ru.practicum.controller.PageConstructor.getPage;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")
-public class UserController {
+public class UserAdminController {
     private final UserService userService;
 
     @PostMapping
@@ -26,12 +27,11 @@ public class UserController {
         return userService.addUser(userDto);
     }
 
-
     @GetMapping
     public List<UserDto> findUsersPage(@RequestParam(required = false) List<Long> ids,
                                        @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                        @Positive @RequestParam(defaultValue = "10") Integer size) {
-        Pageable page = PageRequest.of(from, size);
+        Pageable page = getPage(from, size);
         return userService.findUserPage(ids, page);
     }
 

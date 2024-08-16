@@ -1,6 +1,8 @@
 package ru.practicum.model;
 
 import jakarta.persistence.*;
+import lombok.ToString;
+import ru.practicum.model.status.StateEvent;
 
 import java.time.LocalDateTime;
 
@@ -10,13 +12,15 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "initiator_id")
     private User initiator;
 
+    @ToString.Exclude
     @OneToOne
     @JoinColumn(name = "category_id")
-    private EventCategory category;
+    private Category category;
 
     private String title;
     private String annotation;
@@ -26,10 +30,5 @@ public class Event {
     private Integer participantLimit;
     private LocalDateTime time;
     @Enumerated(EnumType.STRING)
-    private State state;
-
-    public enum State {
-        PUBLISHED,
-        CANCEL_REVIEW
-    }
+    private StateEvent state;
 }
