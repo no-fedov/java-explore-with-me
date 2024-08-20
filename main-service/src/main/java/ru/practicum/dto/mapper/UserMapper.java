@@ -11,6 +11,7 @@ import java.util.List;
 public class UserMapper {
     public static User userFromUserDto(UserDto userDto) {
         return User.builder()
+                .id(userDto.getId())
                 .email(userDto.getEmail())
                 .name(userDto.getName())
                 .build();

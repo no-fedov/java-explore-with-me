@@ -1,12 +1,9 @@
 package ru.practicum.dto;
 
 public interface View {
-    interface PUBLIC {
+    interface PATCH {
     }
 
-    interface ADMIN {
-    }
-
-    interface PRIVATE {
+    interface POST {
     }
 }

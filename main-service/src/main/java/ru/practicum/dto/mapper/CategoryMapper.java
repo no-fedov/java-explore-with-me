@@ -11,6 +11,7 @@ import java.util.List;
 public class CategoryMapper {
     public static Category categoryFromCategoryDto(CategoryDto categoryDto) {
         return Category.builder()
+                .id(categoryDto.getId())
                 .name(categoryDto.getName())
                 .build();
     }

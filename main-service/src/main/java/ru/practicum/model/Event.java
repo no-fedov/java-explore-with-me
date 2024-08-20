@@ -1,12 +1,17 @@
 package ru.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.ToString;
+import lombok.*;
 import ru.practicum.model.status.StateEvent;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Builder(toBuilder = true)
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,11 +24,14 @@ public class Event {
 
     @ToString.Exclude
     @OneToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category;
 
+    @Column(length = 120)
     private String title;
+    @Column(length = 2000)
     private String annotation;
+    @Column(length = 7000)
     private String description;
     private Boolean paid;
     private Boolean requestModeration;
@@ -31,4 +39,13 @@ public class Event {
     private LocalDateTime time;
     @Enumerated(EnumType.STRING)
     private StateEvent state;
+
+    @ToString.Exclude
+    @OneToOne
+    @JoinColumns({
+            @JoinColumn(name = "location_lat", referencedColumnName = "lat"),
+            @JoinColumn(name = "location_lon", referencedColumnName = "lon")
+    })
+    private Location location;
+    private LocalDateTime createdOn;
 }
