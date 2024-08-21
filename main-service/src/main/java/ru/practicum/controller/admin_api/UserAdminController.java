@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,14 @@ import static ru.practicum.controller.PageConstructor.getPage;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")
+@Slf4j
 public class UserAdminController {
     private final UserService userService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto postUser(@Valid @RequestBody UserDto userDto) {
+        log.info("POST: /admin/users {}", userDto);
         return userService.addUser(userDto);
     }
 
