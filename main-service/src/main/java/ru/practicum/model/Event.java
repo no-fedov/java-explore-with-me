@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Event {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_seq")
+    @SequenceGenerator(name = "event_seq", sequenceName = "event_sequence", initialValue = 0, allocationSize = 1)
     private Long id;
 
     @ToString.Exclude

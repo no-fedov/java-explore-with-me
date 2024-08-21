@@ -8,7 +8,7 @@ import ru.practicum.dto.UserDto;
 import ru.practicum.dto.event.EventDto;
 import ru.practicum.dto.event.EventUpdateDto;
 import ru.practicum.dto.mapper.EventMapper;
-import ru.practicum.exception.EventStateException;
+import ru.practicum.exception.event.EventStateException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Event;
 import ru.practicum.model.status.StateEvent;
@@ -91,6 +91,5 @@ public class EventPrivateServiceImp implements EventService {
     private Event findEventById(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + id + "was not found"));
-
     }
 }

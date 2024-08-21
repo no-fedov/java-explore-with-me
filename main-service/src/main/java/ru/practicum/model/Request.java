@@ -14,11 +14,13 @@ import java.time.LocalDateTime;
 @Setter
 public class Request {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "requester_id")
     private User requester;
     @Enumerated(EnumType.STRING)
     private RequestStatus status;
