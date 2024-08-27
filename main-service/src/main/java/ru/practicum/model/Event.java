@@ -36,7 +36,7 @@ public class Event {
     private String description;
     private Boolean paid;
     private Boolean requestModeration;
-    private Integer participantLimit;
+    private Long participantLimit;
     private LocalDateTime time;
     @Enumerated(EnumType.STRING)
     private StateEvent state;

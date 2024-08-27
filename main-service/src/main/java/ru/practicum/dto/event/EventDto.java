@@ -38,7 +38,7 @@ public class EventDto {
     private String description;
 
     @Positive
-    private Integer participantLimit;
+    private Long participantLimit;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @NotNull

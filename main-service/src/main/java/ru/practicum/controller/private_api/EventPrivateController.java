@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventDto;
 import ru.practicum.dto.event.EventUpdateDto;
@@ -23,6 +24,7 @@ import static ru.practicum.controller.PageConstructor.getPage;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class EventPrivateController {
     private final EventService eventService;
 
@@ -32,7 +34,7 @@ public class EventPrivateController {
                               @Valid @RequestBody EventDto eventDto) {
         eventDto.setInitiator(userId);
         eventDto.setCreatedOn(LocalDateTime.now());
-        eventDto.setState(StateEvent.PUBLISHED);
+        eventDto.setState(StateEvent.PENDING);
         log.info("POST /users/{userId}/events userId = {} , body = {}", userId, eventDto);
         return eventService.addEvent(eventDto);
     }

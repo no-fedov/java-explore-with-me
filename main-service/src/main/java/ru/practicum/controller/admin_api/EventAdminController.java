@@ -28,7 +28,6 @@ public class EventAdminController {
             .ofPattern(URLDecoder.decode("yyyy-MM-dd HH:mm:ss", UTF_8));
 
     private final EventAdminService eventAdminService;
-    private final JPAQueryFactory queryFactory;
 
     @GetMapping
     public List<EventDto> getEvents(@RequestParam(required = false) List<Long> users,
@@ -55,6 +54,6 @@ public class EventAdminController {
                 .rangeEnd(endTime)
                 .page(PageConstructor.getPage(from, size))
                 .build();
-        return eventAdminService.getEvents(queryFactory, parameters);
+        return eventAdminService.getEvents(parameters);
     }
 }
