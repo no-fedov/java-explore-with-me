@@ -56,8 +56,18 @@ public class RequestServiceImp implements RequestService {
         return RequestMapper.convertToRequestDtoList(requests);
     }
 
-
-
+    @Override
+    public RequestDto rejectRequest(Long userId, Long requestId) {
+        Optional<Request> currentRequest = requestRepository.findByRequester_IdAndEvent_Id(userId, requestId);
+        if (currentRequest.isEmpty()) {
+            throw new NotFoundException("Пользователь не подавал заявку на участие в событии," +
+                    " поэтому нельзя отменить участие в том в чем не участвуешь");
+        }
+        Request request = currentRequest.get();
+        request.setStatus(RequestStatus.REJECTED);
+        requestRepository.save(request);
+        return RequestMapper.convertToRequestDto(request);
+    }
 
     private void validRequest(RequestDto requestDto, User currentUser, Event currentEvent) {
         if (currentEvent.getInitiator().getId().equals(currentUser.getId())) {

@@ -16,4 +16,4 @@ public interface EventService {
     EventDto getEvent(Long userId, Long eventId);
 
     EventDto findEvent(Long eventId);
-}
+ }

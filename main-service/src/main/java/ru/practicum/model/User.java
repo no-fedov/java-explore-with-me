@@ -13,6 +13,8 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class User {
     @Id
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+//    @SequenceGenerator(name = "user_seq", initialValue = 0, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

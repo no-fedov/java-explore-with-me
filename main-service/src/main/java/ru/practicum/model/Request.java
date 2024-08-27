@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 @Setter
 public class Request {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "request_seq")
+    @SequenceGenerator(name = "request_seq", sequenceName = "request_sequence", initialValue = 0, allocationSize = 1)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "event_id")

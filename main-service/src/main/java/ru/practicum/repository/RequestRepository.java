@@ -18,7 +18,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
         QRequest request = QRequest.request;
         return queryFactory.select(request)
                 .where(request.event.id.eq(eventId)
-                        .and(request.status.ne(RequestStatus.CANCELED))
+                        .and(request.status.ne(RequestStatus.REJECTED))
                 ).stream().count();
     }
 }

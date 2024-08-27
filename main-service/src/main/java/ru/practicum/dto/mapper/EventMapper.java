@@ -101,7 +101,7 @@ public class EventMapper {
             if (eventUpdateDto.getStateAction() == StateEventDto.CANCEL_REVIEW) {
                 event.setState(StateEvent.CANCELED);
             }
-            event.setState(StateEvent.WAITING);
+            event.setState(StateEvent.PENDING);
         }
         return event;
     }

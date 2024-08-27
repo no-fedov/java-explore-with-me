@@ -9,4 +9,5 @@ public interface RequestService {
 
     List<RequestDto> getRequestsUser(Long userId);
 
+    RequestDto rejectRequest(Long userId, Long requestId);
 }

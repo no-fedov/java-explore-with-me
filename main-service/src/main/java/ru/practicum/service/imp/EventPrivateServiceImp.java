@@ -8,8 +8,8 @@ import ru.practicum.dto.UserDto;
 import ru.practicum.dto.event.EventDto;
 import ru.practicum.dto.event.EventUpdateDto;
 import ru.practicum.dto.mapper.EventMapper;
-import ru.practicum.exception.event.EventStateException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.event.EventStateException;
 import ru.practicum.model.Event;
 import ru.practicum.model.status.StateEvent;
 import ru.practicum.repository.EventRepository;
@@ -52,8 +52,9 @@ public class EventPrivateServiceImp implements EventService {
     public EventDto updateEvent(EventUpdateDto eventUpdateDto) {
         Event event = findEventById(eventUpdateDto.getId());
 
-        if (eventUpdateDto.getCategory() != null)
+        if (eventUpdateDto.getCategory() != null) {
             categoryService.findCategory(eventUpdateDto.getCategory());
+        }
         //обновить категории забыл я
         if (!event.getInitiator().getId().equals(eventUpdateDto.getInitiator())) {
             throw new NotFoundException("Event with id=" + eventUpdateDto.getId() + "was not found");
