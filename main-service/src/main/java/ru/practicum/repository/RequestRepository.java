@@ -7,18 +7,18 @@ import ru.practicum.model.Request;
 import ru.practicum.model.status.RequestStatus;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
-    Optional<Request> findByRequester_IdAndEvent_Id(Long requester, Long event);
+    List<Request> findByRequester_IdAndEvent_Id(Long requester, Long event);
 
     List<Request> findByRequester_Id(Long userId);
 
     default Long countPotentialParticipants(JPAQueryFactory queryFactory, Long eventId) {
         QRequest request = QRequest.request;
-        return queryFactory.select(request)
+        return queryFactory.select(request.count())
+                .from(request)
                 .where(request.event.id.eq(eventId)
-                        .and(request.status.ne(RequestStatus.REJECTED))
-                ).stream().count();
+                        .and(request.status.ne(RequestStatus.REJECTED)))
+                .fetchOne();
     }
 }

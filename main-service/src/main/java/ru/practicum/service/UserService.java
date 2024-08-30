@@ -1,12 +1,13 @@
 package ru.practicum.service;
 
 import org.springframework.data.domain.Pageable;
-import ru.practicum.dto.UserDto;
+import ru.practicum.dto.user.NewUserRequest;
+import ru.practicum.dto.user.UserDto;
 
 import java.util.List;
 
 public interface UserService {
-    UserDto addUser(UserDto userDto);
+    UserDto addUser(NewUserRequest userDto);
 
     UserDto findUser(Long id);
 

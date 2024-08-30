@@ -26,7 +26,6 @@ public class RequestPrivateController {
                 .requester(userId)
                 .event(eventId)
                 .created(LocalDateTime.now())
-                .status(PENDING)
                 .build();
         log.info("POST /users/{userId}/requests  userId = {}, body = {}", userId, requestDto);
         return requestService.addRequest(requestDto);

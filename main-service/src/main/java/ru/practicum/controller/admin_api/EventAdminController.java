@@ -1,15 +1,12 @@
 package ru.practicum.controller.admin_api;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.controller.PageConstructor;
-import ru.practicum.dto.event.EventDto;
+import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.URLParameterEventAdmin;
+import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.service.EventAdminService;
 
 import java.net.URLDecoder;
@@ -30,13 +27,13 @@ public class EventAdminController {
     private final EventAdminService eventAdminService;
 
     @GetMapping
-    public List<EventDto> getEvents(@RequestParam(required = false) List<Long> users,
-                                    @RequestParam(required = false) List<String> states,
-                                    @RequestParam(required = false) List<Long> categories,
-                                    @RequestParam(required = false) String rangeStart,
-                                    @RequestParam(required = false) String rangeEnd,
-                                    @RequestParam(defaultValue = "0") Integer from,
-                                    @RequestParam(defaultValue = "10") Integer size) {
+    public List<EventFullDto> getEvents(@RequestParam(required = false) List<Long> users,
+                                        @RequestParam(required = false) List<String> states,
+                                        @RequestParam(required = false) List<Long> categories,
+                                        @RequestParam(required = false) String rangeStart,
+                                        @RequestParam(required = false) String rangeEnd,
+                                        @RequestParam(defaultValue = "0") Integer from,
+                                        @RequestParam(defaultValue = "10") Integer size) {
         LocalDateTime startTime = null;
         if (rangeStart != null) {
             startTime = LocalDateTime.parse(rangeStart, timeFormat);
@@ -55,5 +52,11 @@ public class EventAdminController {
                 .page(PageConstructor.getPage(from, size))
                 .build();
         return eventAdminService.getEvents(parameters);
+    }
+
+    @PatchMapping("/{eventId}")
+    public EventFullDto updateEvent(@PathVariable Long eventId,
+                                     @RequestBody UpdateEventAdminRequest eventDto) {
+        return eventAdminService.updateEvent(eventId, eventDto);
     }
 }

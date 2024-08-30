@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.dto.UserDto;
+import ru.practicum.dto.mapper.UserMapper;
+import ru.practicum.dto.user.NewUserRequest;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.model.User;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.service.UserService;
@@ -20,17 +22,18 @@ public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDto addUser(UserDto userDto) {
-        User user = userFromUserDto(userDto);
+    public UserDto addUser(NewUserRequest newUserRequest) {
+
+        User user = UserMapper.convertToUserFromNewUserRequest(newUserRequest);
         userRepository.save(user);
         log.info("saved User: {}", user);
-        return userDtoFromUser(user);
+        return convertToUserDtoFromUser(user);
     }
 
     @Override
     public UserDto findUser(Long id) {
         log.info("search user where id = {}", id);
-        return userDtoFromUser(findUserById(id));
+        return convertToUserDtoFromUser(findUserById(id));
     }
 
     @Override

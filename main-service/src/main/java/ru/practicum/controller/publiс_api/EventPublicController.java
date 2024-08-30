@@ -5,10 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.controller.PageConstructor;
-import ru.practicum.dto.event.EventDto;
+import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.URLParameterEventPublic;
 import ru.practicum.service.EventPublicService;
-import ru.practicum.service.EventService;
 
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
@@ -27,15 +26,14 @@ public class EventPublicController {
             .ofPattern(URLDecoder.decode("yyyy-MM-dd HH:mm:ss", UTF_8));
 
     @GetMapping
-    public List<EventDto> getEvents(@RequestParam(required = false) String text,
-                                    @RequestParam(required = false) List<Long> categories,
-                                    @RequestParam(required = false) Boolean paid,
-                                    @RequestParam(required = false) String rangeStart,
-                                    @RequestParam(required = false) String rangeEnd,
-                                    @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-                                    @RequestParam(defaultValue = "0") Integer from,
-                                    @RequestParam(defaultValue = "10") Integer size) {
-
+    public List<EventShortDto> getEvents(@RequestParam(required = false) String text,
+                                         @RequestParam(required = false) List<Long> categories,
+                                         @RequestParam(required = false) Boolean paid,
+                                         @RequestParam(required = false) String rangeStart,
+                                         @RequestParam(required = false) String rangeEnd,
+                                         @RequestParam(defaultValue = "false") Boolean onlyAvailable,
+                                         @RequestParam(defaultValue = "0") Integer from,
+                                         @RequestParam(defaultValue = "10") Integer size) {
         URLParameterEventPublic parameters = URLParameterEventPublic.builder()
                 .text(text)
                 .categories(categories)
@@ -48,8 +46,8 @@ public class EventPublicController {
         return eventPublicService.findEvents(parameters);
     }
 
-    @GetMapping("/{id}")
-    public EventDto getEvent(@PositiveOrZero @PathVariable Long id) {
-        return eventPublicService.findEvent(id);
-    }
+//    @GetMapping("/{id}")
+//    public EventShortDto getEvent(@PositiveOrZero @PathVariable Long id) {
+//        return eventPublicService.findEvent(id);
+//    }
 }

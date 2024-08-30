@@ -49,4 +49,6 @@ public class Event {
     })
     private Location location;
     private LocalDateTime createdOn;
+    @Column(nullable = true)
+    private LocalDateTime publishedOn;
 }

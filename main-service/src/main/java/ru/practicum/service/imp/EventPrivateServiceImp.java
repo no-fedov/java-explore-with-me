@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
-import ru.practicum.dto.UserDto;
-import ru.practicum.dto.event.EventDto;
-import ru.practicum.dto.event.EventUpdateDto;
+import ru.practicum.dto.event.EventShortDto;
+import ru.practicum.dto.event.NewEventDto;
+import ru.practicum.dto.event.UpdateEventUserRequest;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.dto.mapper.EventMapper;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.exception.event.EventStateException;
+import ru.practicum.exception.EventActionException;
 import ru.practicum.model.Event;
 import ru.practicum.model.status.StateEvent;
 import ru.practicum.repository.EventRepository;
@@ -18,6 +19,7 @@ import ru.practicum.service.EventService;
 import ru.practicum.service.LocationService;
 import ru.practicum.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static ru.practicum.dto.mapper.EventMapper.*;
@@ -31,27 +33,26 @@ public class EventPrivateServiceImp implements EventService {
     private final LocationService locationService;
 
     @Override
-    public EventDto addEvent(EventDto eventDto) {
-        UserDto currentUserDto = userService.findUser(eventDto.getInitiator());
+    public EventShortDto addEvent(Long userId, NewEventDto eventDto) {
+        UserDto currentUserDto = userService.findUser(userId);
         CategoryDto currentCategoryDto = null;
         if (eventDto.getCategory() != null) {
             currentCategoryDto = categoryService.findCategory(eventDto.getCategory());
         }
-
         locationService.addLocation(eventDto.getLocation());
-
-        Event newEvent = EventMapper.eventFromEventDto(eventDto,
+        Event newEvent = EventMapper.eventFromNewEventDto(eventDto,
                 currentUserDto,
                 currentCategoryDto,
                 eventDto.getLocation());
+        newEvent.setCreatedOn(LocalDateTime.now());
+        newEvent.setState(StateEvent.PENDING);
         eventRepository.save(newEvent);
         return eventDtoFromEvent(newEvent);
     }
 
     @Override
-    public EventDto updateEvent(EventUpdateDto eventUpdateDto) {
+    public EventShortDto updateEvent(UpdateEventUserRequest eventUpdateDto) {
         Event event = findEventById(eventUpdateDto.getId());
-
         if (eventUpdateDto.getCategory() != null) {
             categoryService.findCategory(eventUpdateDto.getCategory());
         }
@@ -60,7 +61,7 @@ public class EventPrivateServiceImp implements EventService {
             throw new NotFoundException("Event with id=" + eventUpdateDto.getId() + "was not found");
         }
         if (event.getState() == StateEvent.PUBLISHED) {
-            throw new EventStateException("Event must not be published");
+            throw new EventActionException("Event must not be published");
         }
 
         updatedEvent(event, eventUpdateDto);
@@ -70,13 +71,13 @@ public class EventPrivateServiceImp implements EventService {
     }
 
     @Override
-    public List<EventDto> getEvents(Long userId, Pageable page) {
+    public List<EventShortDto> getEvents(Long userId, Pageable page) {
         List<Event> events = eventRepository.findByInitiator_Id(userId, page).toList();
         return convertToListEventDto(events);
     }
 
     @Override
-    public EventDto getEvent(Long userId, Long eventId) {
+    public EventShortDto getEvent(Long userId, Long eventId) {
         Event currentEvent = findEventById(eventId);
         if (currentEvent.getInitiator().getId().equals(userId)) {
             throw new NotFoundException("User don't have Event with id=" + eventId);
@@ -85,7 +86,7 @@ public class EventPrivateServiceImp implements EventService {
     }
 
     @Override
-    public EventDto findEvent(Long eventId) {
+    public EventShortDto findEvent(Long eventId) {
         return eventDtoFromEvent(findEventById(eventId));
     }
 

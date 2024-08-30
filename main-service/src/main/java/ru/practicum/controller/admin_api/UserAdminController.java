@@ -9,7 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.dto.UserDto;
+import ru.practicum.dto.user.NewUserRequest;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.service.UserService;
 
 import java.util.List;
@@ -25,9 +26,9 @@ public class UserAdminController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto postUser(@Valid @RequestBody UserDto userDto) {
-        log.info("POST: /admin/users {}", userDto);
-        return userService.addUser(userDto);
+    public UserDto postUser(@Valid @RequestBody NewUserRequest newUserRequest) {
+        log.info("POST: /admin/users {}", newUserRequest);
+        return userService.addUser(newUserRequest);
     }
 
     @GetMapping

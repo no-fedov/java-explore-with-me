@@ -4,29 +4,30 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.LocationDto;
-import ru.practicum.dto.UserDto;
-import ru.practicum.dto.event.EventDto;
-import ru.practicum.dto.event.EventUpdateDto;
-import ru.practicum.dto.event.StateEventDto;
+import ru.practicum.dto.event.*;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.Location;
 import ru.practicum.model.User;
 import ru.practicum.model.status.StateEvent;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.dto.mapper.CategoryMapper.categoryDtoFromCategory;
 import static ru.practicum.dto.mapper.CategoryMapper.categoryFromCategoryDto;
 import static ru.practicum.dto.mapper.LocationMapper.locationDtoFromLocation;
 import static ru.practicum.dto.mapper.LocationMapper.locationFromLocationDto;
+import static ru.practicum.dto.mapper.UserMapper.convertToUserShortDtoFromUser;
 import static ru.practicum.dto.mapper.UserMapper.userFromUserDto;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventMapper {
-    public static Event eventFromEventDto(EventDto eventDto,
-                                          UserDto userDto,
-                                          CategoryDto categoryDto,
-                                          LocationDto locationDto) {
+    public static Event eventFromNewEventDto(NewEventDto eventDto,
+                                             UserDto userDto,
+                                             CategoryDto categoryDto,
+                                             LocationDto locationDto) {
         User currentUser = userDto != null
                 ? userFromUserDto(userDto)
                 : null;
@@ -47,32 +48,25 @@ public class EventMapper {
                 .paid(eventDto.getPaid())
                 .requestModeration(eventDto.getRequestModeration())
                 .participantLimit(eventDto.getParticipantLimit())
-                .state(eventDto.getState())
                 .location(currentLocation)
-                .createdOn(eventDto.getCreatedOn())
+                .createdOn(LocalDateTime.now())
                 .time(eventDto.getEventDate())
                 .build();
     }
 
-    public static EventDto eventDtoFromEvent(Event event) {
-        return EventDto.builder()
+    public static EventShortDto eventDtoFromEvent(Event event) {
+        return EventShortDto.builder()
                 .id(event.getId())
-                .initiator(event.getInitiator().getId())
-                .category(event.getCategory().getId())
+                .initiator(UserMapper.convertToUserShortDtoFromUser(event.getInitiator()))
+                .category(CategoryMapper.categoryDtoFromCategory(event.getCategory()))
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
-                .description(event.getDescription())
                 .paid(event.getPaid())
-                .requestModeration(event.getRequestModeration())
-                .participantLimit(event.getParticipantLimit())
-                .state(event.getState())
-                .location(locationDtoFromLocation(event.getLocation()))
-                .createdOn(event.getCreatedOn())
                 .eventDate(event.getTime())
                 .build();
     }
 
-    public static Event updatedEvent(final Event event, EventUpdateDto eventUpdateDto) {
+    public static Event updatedEvent(final Event event, UpdateEventUserRequest eventUpdateDto) {
         if (eventUpdateDto.getTitle() != null) {
             event.setTitle(eventUpdateDto.getTitle());
         }
@@ -98,7 +92,7 @@ public class EventMapper {
             event.setCreatedOn(eventUpdateDto.getCreatedOn());
         }
         if (eventUpdateDto.getStateAction() != null) {
-            if (eventUpdateDto.getStateAction() == StateEventDto.CANCEL_REVIEW) {
+            if (eventUpdateDto.getStateAction() == StateEventAdmin.CANCEL_REVIEW) {
                 event.setState(StateEvent.CANCELED);
             }
             event.setState(StateEvent.PENDING);
@@ -106,7 +100,69 @@ public class EventMapper {
         return event;
     }
 
-    public static List<EventDto> convertToListEventDto(List<Event> list) {
+    public static List<EventShortDto> convertToListEventDto(List<Event> list) {
         return list.stream().map(EventMapper::eventDtoFromEvent).toList();
+    }
+
+    public static Event convertToUpdatedEventDtoFromEventAndUpdateEventAdmin(Event event, UpdateEventAdminRequest eventDto) {
+        if (eventDto.getAnnotation() != null && !eventDto.getAnnotation().isBlank()) {
+            event.setAnnotation(eventDto.getAnnotation());
+        }
+//        if (eventDto.getCategory() != null) {
+//            event.setCategory();
+//        }
+
+        if (eventDto.getDescription() != null && !eventDto.getDescription().isBlank()) {
+            event.setDescription(eventDto.getDescription());
+        }
+
+        if (eventDto.getEventDate() != null) {
+            event.setTime(eventDto.getEventDate());
+        }
+
+//        if (локация)
+
+        if (eventDto.getPaid() != null) {
+            event.setPaid(eventDto.getPaid());
+        }
+
+        if (eventDto.getParticipantLimit() != null) {
+            event.setParticipantLimit(eventDto.getParticipantLimit());
+        }
+
+        if (eventDto.getRequestModeration() != null) {
+            event.setRequestModeration(eventDto.getRequestModeration());
+        }
+
+        if (eventDto.getStateAction() != null) {
+            if (eventDto.getStateAction() == StateEventAdmin.PUBLISH_EVENT) {
+                event.setState(StateEvent.PUBLISHED);
+            }
+            if (eventDto.getStateAction() == StateEventAdmin.CANCEL_REVIEW) {
+                event.setState(StateEvent.CANCELED);
+            }
+            if (eventDto.getStateAction() == StateEventAdmin.SEND_TO_REVIEW) {
+                event.setState(StateEvent.PENDING);
+            }
+        }
+        return event;
+    }
+
+    public static EventFullDto convertToEventFullDtoFromEvent(Event event) {
+        return EventFullDto.builder()
+                .id(event.getId())
+                .initiator(convertToUserShortDtoFromUser(event.getInitiator()))
+                .category(categoryDtoFromCategory(event.getCategory()))
+                .title(event.getTitle())
+                .annotation(event.getAnnotation())
+                .description(event.getDescription())
+                .paid(event.getPaid())
+                .requestModeration(event.getRequestModeration())
+                .participantLimit(event.getParticipantLimit())
+                .state(event.getState())
+                .location(locationDtoFromLocation(event.getLocation()))
+                .createdOn(event.getCreatedOn())
+                .eventDate(event.getTime())
+                .build();
     }
 }

@@ -2,7 +2,9 @@ package ru.practicum.dto.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.dto.UserDto;
+import ru.practicum.dto.user.NewUserRequest;
+import ru.practicum.dto.user.UserDto;
+import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.model.User;
 
 import java.util.List;
@@ -17,7 +19,7 @@ public class UserMapper {
                 .build();
     }
 
-    public static UserDto userDtoFromUser(User user) {
+    public static UserDto convertToUserDtoFromUser(User user) {
         return UserDto.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -26,6 +28,20 @@ public class UserMapper {
     }
 
     public static List<UserDto> listUserDtoFroUser(List<User> userList) {
-        return userList.stream().map(UserMapper::userDtoFromUser).toList();
+        return userList.stream().map(UserMapper::convertToUserDtoFromUser).toList();
+    }
+
+    public static User convertToUserFromNewUserRequest(NewUserRequest newUserRequest) {
+        return User.builder()
+                .email(newUserRequest.getEmail())
+                .name(newUserRequest.getName())
+                .build();
+    }
+
+    public static UserShortDto convertToUserShortDtoFromUser(User user) {
+        return UserShortDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .build();
     }
 }

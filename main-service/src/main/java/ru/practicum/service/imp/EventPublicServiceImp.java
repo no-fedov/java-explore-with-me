@@ -6,7 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.LocationDto;
-import ru.practicum.dto.event.EventDto;
+import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.URLParameterEventPublic;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.QEvent;
@@ -28,8 +28,8 @@ public class EventPublicServiceImp implements EventPublicService {
     private final QLocation location = QLocation.location;
     private final QRequest request = QRequest.request;
 
-    public List<EventDto> findEvents(URLParameterEventPublic parameters) {
-        JPAQuery<EventDto> query = queryFactory.select(Projections.constructor(EventDto.class,
+    public List<EventShortDto> findEvents(URLParameterEventPublic parameters) {
+        JPAQuery<EventShortDto> query = queryFactory.select(Projections.constructor(EventShortDto.class,
                         event.id,
                         event.initiator.id,
                         event.category.id,
@@ -83,13 +83,18 @@ public class EventPublicServiceImp implements EventPublicService {
         return query.fetch();
     }
 
-
-    //скорее всего здесь другой метод надо, так как доп требования
-    public EventDto findEvent(Long id) {
-        EventDto event = eventService.findEvent(id);
-        if (event.getState() != StateEvent.PUBLISHED) {
-            throw new NotFoundException("Не найден такой event ли он еще не опубликован");
-        }
-        return event;
+    @Override
+    public EventShortDto findEvent(Long id) {
+        return null;
     }
+
+
+//    //скорее всего здесь другой метод надо, так как доп требования
+//    public EventShortDto findEvent(Long id) {
+//        EventShortDto event = eventService.findEvent(id);
+//        if (event.getState() != StateEvent.PUBLISHED) {
+//            throw new NotFoundException("Не найден такой event ли он еще не опубликован");
+//        }
+//        return event;
+//    }
 }
