@@ -42,7 +42,6 @@ public class EventAdminController {
         if (rangeEnd != null) {
             endTime = LocalDateTime.parse(rangeEnd, timeFormat);
         }
-
         URLParameterEventAdmin parameters = URLParameterEventAdmin.builder()
                 .users(users != null ? users : List.of())
                 .states(states != null ? states : List.of())
@@ -56,7 +55,8 @@ public class EventAdminController {
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
-                                     @RequestBody UpdateEventAdminRequest eventDto) {
+                                    @RequestBody UpdateEventAdminRequest eventDto) {
+        log.info("PATCH /admin/events/{eventId} eventId = {} body = {}", eventId, eventDto);
         return eventAdminService.updateEvent(eventId, eventDto);
     }
 }

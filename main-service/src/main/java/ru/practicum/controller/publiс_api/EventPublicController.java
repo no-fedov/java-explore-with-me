@@ -31,7 +31,7 @@ public class EventPublicController {
                                          @RequestParam(required = false) Boolean paid,
                                          @RequestParam(required = false) String rangeStart,
                                          @RequestParam(required = false) String rangeEnd,
-                                         @RequestParam(defaultValue = "false") Boolean onlyAvailable,
+                                         @RequestParam(defaultValue = "false") Boolean onlyAvailable ,
                                          @RequestParam(defaultValue = "0") Integer from,
                                          @RequestParam(defaultValue = "10") Integer size) {
         URLParameterEventPublic parameters = URLParameterEventPublic.builder()

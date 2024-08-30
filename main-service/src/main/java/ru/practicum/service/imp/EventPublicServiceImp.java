@@ -5,15 +5,13 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.LocationDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.URLParameterEventPublic;
-import ru.practicum.exception.NotFoundException;
-import ru.practicum.model.QEvent;
-import ru.practicum.model.QLocation;
-import ru.practicum.model.QRequest;
+import ru.practicum.dto.user.UserShortDto;
+import ru.practicum.model.*;
 import ru.practicum.model.status.RequestStatus;
-import ru.practicum.model.status.StateEvent;
 import ru.practicum.service.EventPublicService;
 import ru.practicum.service.EventService;
 
@@ -27,26 +25,33 @@ public class EventPublicServiceImp implements EventPublicService {
     private final QEvent event = QEvent.event;
     private final QLocation location = QLocation.location;
     private final QRequest request = QRequest.request;
+    private final QUser user = QUser.user;
+    private final QCategory category = QCategory.category;
 
     public List<EventShortDto> findEvents(URLParameterEventPublic parameters) {
         JPAQuery<EventShortDto> query = queryFactory.select(Projections.constructor(EventShortDto.class,
                         event.id,
-                        event.initiator.id,
-                        event.category.id,
+                        Projections.constructor(UserShortDto.class,
+                                user.id,
+                                user.name),
+                        Projections.constructor(CategoryDto.class,
+                                category.id,
+                                category.name),
+                        Projections.constructor(LocationDto.class,
+                                location.locationId.lat,
+                                location.locationId.lon),
                         event.title,
                         event.annotation,
                         event.description,
                         event.participantLimit,
                         event.time,
-                        Projections.constructor(LocationDto.class, // Проекция на LocationDto
-                                location.locationId.lat,
-                                location.locationId.lon),
                         event.paid,
                         event.requestModeration,
                         event.state,
                         event.createdOn))
-                .from(event).leftJoin(event.location, location);
-
+                .from(event).leftJoin(event.location, location)
+                .leftJoin(event.initiator, user)
+                .leftJoin(event.category, category);
 
         if (parameters.getCategories() != null && !parameters.getCategories().isEmpty()) {
             query.where(event.category.id.in(parameters.getCategories()));
@@ -74,7 +79,7 @@ public class EventPublicServiceImp implements EventPublicService {
                     .select(request.count())
                     .from(request)
                     .where(request.event.id.eq(event.id)
-                            .and(request.status.eq(RequestStatus.ACCEPTED)));
+                            .and(request.status.eq(RequestStatus.CONFIRMED)));
 
             query.where(confirmedRequestCountSubquery.lt(event.participantLimit));
         }
@@ -87,7 +92,6 @@ public class EventPublicServiceImp implements EventPublicService {
     public EventShortDto findEvent(Long id) {
         return null;
     }
-
 
 //    //скорее всего здесь другой метод надо, так как доп требования
 //    public EventShortDto findEvent(Long id) {

@@ -61,19 +61,25 @@ public class EventMapper {
                 .category(CategoryMapper.categoryDtoFromCategory(event.getCategory()))
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
+                .description(event.getDescription())
                 .paid(event.getPaid())
+                .requestModeration(event.getRequestModeration())
+                .participantLimit(event.getParticipantLimit())
+                .state(event.getState())
+                .location(locationDtoFromLocation(event.getLocation()))
+                .createdOn(event.getCreatedOn())
                 .eventDate(event.getTime())
                 .build();
     }
 
-    public static Event updatedEvent(final Event event, UpdateEventUserRequest eventUpdateDto) {
-        if (eventUpdateDto.getTitle() != null) {
+    public static Event convertToEventFromUpdateEventUserRequest(final Event event, UpdateEventUserRequest eventUpdateDto) {
+        if (eventUpdateDto.getTitle() != null && !eventUpdateDto.getTitle().isBlank()) {
             event.setTitle(eventUpdateDto.getTitle());
         }
-        if (eventUpdateDto.getAnnotation() != null) {
+        if (eventUpdateDto.getAnnotation() != null && !eventUpdateDto.getAnnotation().isBlank()) {
             event.setAnnotation(eventUpdateDto.getAnnotation());
         }
-        if (eventUpdateDto.getDescription() != null) {
+        if (eventUpdateDto.getDescription() != null && !eventUpdateDto.getDescription().isBlank()) {
             event.setDescription(eventUpdateDto.getDescription());
         }
         if (eventUpdateDto.getParticipantLimit() != null) {
@@ -94,8 +100,9 @@ public class EventMapper {
         if (eventUpdateDto.getStateAction() != null) {
             if (eventUpdateDto.getStateAction() == StateEventAdmin.CANCEL_REVIEW) {
                 event.setState(StateEvent.CANCELED);
+            } else {
+                event.setState(StateEvent.PENDING);
             }
-            event.setState(StateEvent.PENDING);
         }
         return event;
     }
@@ -104,24 +111,26 @@ public class EventMapper {
         return list.stream().map(EventMapper::eventDtoFromEvent).toList();
     }
 
-    public static Event convertToUpdatedEventDtoFromEventAndUpdateEventAdmin(Event event, UpdateEventAdminRequest eventDto) {
+    public static Event convertToUpdatedEventDtoFromEventAndUpdateEventAdmin(Event event,
+                                                                             UpdateEventAdminRequest eventDto) {
         if (eventDto.getAnnotation() != null && !eventDto.getAnnotation().isBlank()) {
             event.setAnnotation(eventDto.getAnnotation());
         }
 //        if (eventDto.getCategory() != null) {
 //            event.setCategory();
 //        }
-
         if (eventDto.getDescription() != null && !eventDto.getDescription().isBlank()) {
             event.setDescription(eventDto.getDescription());
+        }
+
+        if (eventDto.getTitle() != null && !eventDto.getTitle().isBlank()) {
+            event.setTitle(eventDto.getTitle());
         }
 
         if (eventDto.getEventDate() != null) {
             event.setTime(eventDto.getEventDate());
         }
-
 //        if (локация)
-
         if (eventDto.getPaid() != null) {
             event.setPaid(eventDto.getPaid());
         }

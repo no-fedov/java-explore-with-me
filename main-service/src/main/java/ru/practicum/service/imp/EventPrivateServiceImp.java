@@ -7,10 +7,10 @@ import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
-import ru.practicum.dto.user.UserDto;
 import ru.practicum.dto.mapper.EventMapper;
-import ru.practicum.exception.NotFoundException;
+import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.EventActionException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Event;
 import ru.practicum.model.status.StateEvent;
 import ru.practicum.repository.EventRepository;
@@ -61,12 +61,14 @@ public class EventPrivateServiceImp implements EventService {
             throw new NotFoundException("Event with id=" + eventUpdateDto.getId() + "was not found");
         }
         if (event.getState() == StateEvent.PUBLISHED) {
-            throw new EventActionException("Event must not be published");
+            throw new EventActionException("Нельзя изменять опубликованное событие");
         }
-
-        updatedEvent(event, eventUpdateDto);
+        if (event.getTime().isBefore(LocalDateTime.now().minusHours(2))) {
+            throw new EventActionException("дата и время на которые намечено событие не может быть раньше," +
+                    " чем через два часа от текущего момента");
+        }
+        convertToEventFromUpdateEventUserRequest(event, eventUpdateDto);
         eventRepository.save(event);
-
         return eventDtoFromEvent(event);
     }
 
@@ -79,7 +81,7 @@ public class EventPrivateServiceImp implements EventService {
     @Override
     public EventShortDto getEvent(Long userId, Long eventId) {
         Event currentEvent = findEventById(eventId);
-        if (currentEvent.getInitiator().getId().equals(userId)) {
+        if (!currentEvent.getInitiator().getId().equals(userId)) {
             throw new NotFoundException("User don't have Event with id=" + eventId);
         }
         return eventDtoFromEvent(currentEvent);

@@ -46,7 +46,7 @@ public class EventAdminServiceImp implements EventAdminService {
                 .select(request.count())
                 .from(request)
                 .where(request.event.id.eq(event.id)
-                        .and(request.status.eq(RequestStatus.ACCEPTED)));
+                        .and(request.status.eq(RequestStatus.CONFIRMED)));
 
         JPAQuery<EventFullDto> eventsQuery = queryFactory.select(Projections.constructor(EventFullDto.class,
                         event.id,
@@ -77,7 +77,7 @@ public class EventAdminServiceImp implements EventAdminService {
                 .leftJoin(event.initiator, user)
                 .leftJoin(event.category, category)
                 .leftJoin(event.location, location)
-                .leftJoin(request).on(request.event.id.eq(event.id).and(request.status.eq(RequestStatus.ACCEPTED)))
+                .leftJoin(request).on(request.event.id.eq(event.id).and(request.status.eq(RequestStatus.CONFIRMED)))
                 .where(event.initiator.id.in(parameters.getUsers()))
                 .where(event.state.in(parameters.getStates().stream().map(e -> StateEvent.valueOf(e)).toList()))
                 .where(event.category.id.in(parameters.getCategories()))
@@ -108,6 +108,7 @@ public class EventAdminServiceImp implements EventAdminService {
                 && event.getState() == StateEvent.PUBLISHED) {
             throw new EventActionException("Событие можно отклонить, только если оно еще не опубликовано");
         }
+
         convertToUpdatedEventDtoFromEventAndUpdateEventAdmin(event, eventDto);
         eventRepository.save(event);
         return EventMapper.convertToEventFullDtoFromEvent(event);

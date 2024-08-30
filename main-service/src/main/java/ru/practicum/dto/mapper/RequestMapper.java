@@ -22,8 +22,6 @@ public class RequestMapper {
     }
 
     public static RequestDto convertToRequestDto(Request request) {
-
-
         return RequestDto.builder()
                 .status(request.getStatus())
                 .id(request.getId())
