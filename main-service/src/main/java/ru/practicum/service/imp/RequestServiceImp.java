@@ -45,11 +45,12 @@ public class RequestServiceImp implements RequestService {
         Event currentEvent = eventRepository.findById(requestDto.getEvent())
                 .orElseThrow(() -> new NotFoundException("Событие с id=" + requestDto.getEvent() + " не найдено."));
 
-        if (currentEvent.getRequestModeration() && currentEvent.getParticipantLimit() > 0) {
-            requestDto.setStatus(RequestStatus.PENDING);
-        } else {
+        if (currentEvent.getParticipantLimit() == 0) {
             requestDto.setStatus(RequestStatus.CONFIRMED);
+        } else {
+            requestDto.setStatus(RequestStatus.PENDING);
         }
+
         validRequest(requestDto, currentUser, currentEvent);
         Request newRequest = convertRequestDtoToRequest(requestDto, currentUser, currentEvent);
         requestRepository.save(newRequest);
@@ -99,7 +100,7 @@ public class RequestServiceImp implements RequestService {
                 .where(request.status.eq(RequestStatus.PENDING)).fetch();
 
         if (eventRequestStatusUpdateRequest.getStatus() == EventRequestStatus.REJECTED) {
-            requests.forEach((r) -> r.setStatus(RequestStatus.REJECTED));
+            requests.forEach(r -> r.setStatus(RequestStatus.REJECTED));
             requestRepository.saveAll(requests);
             return EventRequestStatusUpdateResult.builder()
                     .confirmedRequests(List.of())
@@ -107,28 +108,28 @@ public class RequestServiceImp implements RequestService {
                     .build();
         }
 
-        int counter = 0;
-        for (Request request : requests) {
-            if (requestRepository.countPotentialParticipants(queryFactory, eventId)
-                    .compareTo(event.getParticipantLimit()) >= 0) {
+        int confirmedCount = 0;
+        Long participantLimit = event.getParticipantLimit();
+        Long confirmedParticipants = requestRepository.countPotentialParticipants(queryFactory, eventId);
+
+        for (Request req : requests) {
+            if (confirmedParticipants >= participantLimit && participantLimit > 0) {
                 break;
             }
-            request.setStatus(RequestStatus.CONFIRMED);
-            counter++;
+            req.setStatus(RequestStatus.CONFIRMED);
+            confirmedParticipants++;
+            confirmedCount++;
         }
 
-        if (counter != requests.size()) {
-            List<Request> requestsForReject = requests.subList(counter, requests.size() - 1);
-            requestsForReject.forEach((r) -> r.setStatus(RequestStatus.REJECTED));
-            return EventRequestStatusUpdateResult.builder()
-                    .confirmedRequests(RequestMapper.convertToRequestDtoList(requests.subList(0, counter)))
-                    .rejectedRequests(RequestMapper.convertToRequestDtoList(requestsForReject))
-                    .build();
-        }
+        List<Request> confirmedRequests = requests.subList(0, confirmedCount);
+        List<Request> rejectedRequests = requests.subList(confirmedCount, requests.size());
+
+        rejectedRequests.forEach(r -> r.setStatus(RequestStatus.REJECTED));
+        requestRepository.saveAll(requests);
 
         return EventRequestStatusUpdateResult.builder()
-                .confirmedRequests(RequestMapper.convertToRequestDtoList(requests.subList(0, counter)))
-                .rejectedRequests(RequestMapper.convertToRequestDtoList(List.of()))
+                .confirmedRequests(RequestMapper.convertToRequestDtoList(confirmedRequests))
+                .rejectedRequests(RequestMapper.convertToRequestDtoList(rejectedRequests))
                 .build();
     }
 
@@ -149,11 +150,11 @@ public class RequestServiceImp implements RequestService {
             }
         }
 
-        if (currentEvent.getParticipantLimit() > 0) {
-            long potentialParticipants = requestRepository.countPotentialParticipants(queryFactory, currentEvent.getId());
-            if (potentialParticipants >= currentEvent.getParticipantLimit()) {
-                throw new EventActionException("Достигнут лимит запросов на участие");
-            }
+        Long confirmedParticipantEvent = requestRepository
+                .countPotentialParticipants(queryFactory, currentEvent.getId());
+        if (currentEvent.getParticipantLimit() > 0 && confirmedParticipantEvent >= currentEvent.getParticipantLimit()) {
+            throw new RequestActionException("Достигнут лимит участников");
         }
+
     }
 }

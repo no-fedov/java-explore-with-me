@@ -42,6 +42,12 @@ public class ExceptionController {
         return Map.of("Ошибка: ", e.getMessage());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return Map.of("Ошибка: ", ex.getMessage());
+    }
+
     @ExceptionHandler(NoValidParameter.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleNoValidParameter(RuntimeException e) {
