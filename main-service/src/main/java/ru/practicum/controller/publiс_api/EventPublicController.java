@@ -1,9 +1,11 @@
 package ru.practicum.controller.publiс_api;
 
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.controller.PageConstructor;
+import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.URLParameterEventPublic;
 import ru.practicum.service.EventPublicService;
@@ -46,8 +48,8 @@ public class EventPublicController {
         return eventPublicService.findEvents(parameters);
     }
 
-//    @GetMapping("/{id}")
-//    public EventShortDto getEvent(@PositiveOrZero @PathVariable Long id) {
-//        return eventPublicService.findEvent(id);
-//    }
+    @GetMapping("/{id}")
+    public EventFullDto getEvent(@PositiveOrZero @PathVariable Long id) {
+        return eventPublicService.findEvent(id);
+    }
 }

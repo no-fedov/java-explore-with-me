@@ -2,8 +2,6 @@ package ru.practicum.service.imp;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +22,7 @@ import ru.practicum.model.status.RequestStatus;
 import ru.practicum.model.status.StateEvent;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
+import ru.practicum.repository.RequestRepository;
 import ru.practicum.service.EventAdminService;
 
 import java.time.LocalDateTime;
@@ -35,6 +34,7 @@ import static ru.practicum.dto.mapper.EventMapper.convertToUpdatedEventDtoFromEv
 @RequiredArgsConstructor
 public class EventAdminServiceImp implements EventAdminService {
     private final EventRepository eventRepository;
+    private final RequestRepository requestRepository;
     private final CategoryRepository categoryRepository;
     private final JPAQueryFactory queryFactory;
     private final QEvent event = QEvent.event;
@@ -45,13 +45,6 @@ public class EventAdminServiceImp implements EventAdminService {
 
     @Override
     public List<EventFullDto> getEvents(URLParameterEventAdmin parameters) {
-        // Подзапрос для подсчета количества подтвержденных запросов
-        JPQLQuery<Long> confirmedRequestCount = JPAExpressions
-                .select(request.count())
-                .from(request)
-                .where(request.event.id.eq(event.id)
-                        .and(request.status.eq(RequestStatus.CONFIRMED)));
-
         JPAQuery<EventFullDto> eventsQuery = queryFactory.select(Projections.constructor(EventFullDto.class,
                                 event.id,
                                 Projections.constructor(UserShortDto.class,
@@ -67,21 +60,23 @@ public class EventAdminServiceImp implements EventAdminService {
                                 event.annotation,
                                 event.description,
                                 event.participantLimit,
-                                confirmedRequestCount, // confirmedRequest
+                                request.count(),
                                 event.paid,
                                 event.requestModeration,
                                 event.state,
                                 event.createdOn,
                                 event.time,
                                 event.publishedOn,
-                                Expressions.constant(0L)
+                                Expressions.constant(0L) // искуственно устанавливаю количество просмотров
                         )
                 )
                 .from(event)
                 .leftJoin(event.initiator, user)
                 .leftJoin(event.category, category)
                 .leftJoin(event.location, location)
-                .leftJoin(request).on(request.event.id.eq(event.id));
+                .leftJoin(request).on(request.event.id.eq(event.id)
+                        .and(request.status.eq(RequestStatus.CONFIRMED)))
+                .groupBy(event.id, user.id, category.id, location.locationId.lat, location.locationId.lon);
 
         if (!parameters.getStates().isEmpty()) {
             eventsQuery.where(event.state.in(parameters.getStates().stream().map(StateEvent::valueOf).toList()));
@@ -129,13 +124,22 @@ public class EventAdminServiceImp implements EventAdminService {
         }
 
         if (eventDto.getStateAction() != null) {
-            event.setState(eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT
-                    ? StateEvent.PUBLISHED
-                    : StateEvent.CANCELED
-            );
+            if (eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT) {
+                event.setState(StateEvent.PUBLISHED);
+                event.setPublishedOn(LocalDateTime.now());
+            } else {
+                event.setState(StateEvent.CANCELED);
+            }
         }
         convertToUpdatedEventDtoFromEventAndUpdateEventAdmin(event, eventDto);
         eventRepository.save(event);
-        return EventMapper.convertToEventFullDtoFromEvent(event);
+        EventFullDto eventFullDto = EventMapper.convertToEventFullDtoFromEvent(event);
+
+        // искуственно вещаю количество просмотров
+        // и добавляю количесвто одобренных запросов
+        Long confirmedRequestCounter = requestRepository.countPotentialParticipants(queryFactory, eventId);
+        eventFullDto.setConfirmedRequests(confirmedRequestCounter);
+        eventFullDto.setViews(0L);
+        return eventFullDto;
     }
 }

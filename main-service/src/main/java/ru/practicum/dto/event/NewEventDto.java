@@ -35,15 +35,15 @@ public class NewEventDto {
     private String description;
 
     @PositiveOrZero
-    private Long participantLimit;
+    private Long participantLimit = 0L;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @NotNull
     private LocalDateTime eventDate;
 
     private LocationDto location;
-    private Boolean paid;
-    private Boolean requestModeration;
+    private Boolean paid = false;
+    private Boolean requestModeration = true;
 
     public void checkValid() {
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().minusHours(2))) {

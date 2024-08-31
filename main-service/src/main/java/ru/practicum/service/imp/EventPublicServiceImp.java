@@ -2,26 +2,32 @@ package ru.practicum.service.imp;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.LocationDto;
+import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.URLParameterEventPublic;
 import ru.practicum.dto.user.UserShortDto;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.*;
 import ru.practicum.model.status.RequestStatus;
+import ru.practicum.model.status.StateEvent;
+import ru.practicum.repository.EventRepository;
 import ru.practicum.service.EventPublicService;
-import ru.practicum.service.EventService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class EventPublicServiceImp implements EventPublicService {
-    private final EventService eventService;
+    //    private final EventService eventService;
+    private final EventRepository eventRepository;
     private final JPAQueryFactory queryFactory;
     private final QEvent event = QEvent.event;
     private final QLocation location = QLocation.location;
@@ -95,16 +101,44 @@ public class EventPublicServiceImp implements EventPublicService {
     }
 
     @Override
-    public EventShortDto findEvent(Long id) {
-        return null;
+    public EventFullDto findEvent(Long id) {
+        Optional<Event> currentEvent = eventRepository.findById(id);
+        if (currentEvent.isEmpty() || currentEvent.get().getState() != StateEvent.PUBLISHED) {
+            throw new NotFoundException("Не найден такой event ли он еще не опубликован");
+        }
+        JPAQuery<EventFullDto> eventsQuery = queryFactory.select(Projections.constructor(EventFullDto.class,
+                                event.id,
+                                Projections.constructor(UserShortDto.class,
+                                        user.id,
+                                        user.name),
+                                Projections.constructor(CategoryDto.class,
+                                        category.id,
+                                        category.name),
+                                Projections.constructor(LocationDto.class,
+                                        location.locationId.lat,
+                                        location.locationId.lon),
+                                event.title,
+                                event.annotation,
+                                event.description,
+                                event.participantLimit,
+                                request.count(), // количество подтвержденных запросов
+                                event.paid,
+                                event.requestModeration,
+                                event.state,
+                                event.createdOn,
+                                event.time,
+                                event.publishedOn,
+                                Expressions.constant(0L) // искуственно устанавливаю количество просмотров
+                        )
+                )
+                .from(event)
+                .leftJoin(event.initiator, user)
+                .leftJoin(event.category, category)
+                .leftJoin(event.location, location)
+                .leftJoin(request).on(request.event.id.eq(event.id)
+                        .and(request.status.eq(RequestStatus.CONFIRMED)))
+                .where(event.id.eq(id))
+                .groupBy(event.id, user.id, category.id, location.locationId.lat, location.locationId.lon);
+        return eventsQuery.fetchOne();
     }
-
-//    //скорее всего здесь другой метод надо, так как доп требования
-//    public EventShortDto findEvent(Long id) {
-//        EventShortDto event = eventService.findEvent(id);
-//        if (event.getState() != StateEvent.PUBLISHED) {
-//            throw new NotFoundException("Не найден такой event ли он еще не опубликован");
-//        }
-//        return event;
-//    }
 }

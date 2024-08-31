@@ -10,7 +10,6 @@ import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.Location;
 import ru.practicum.model.User;
-import ru.practicum.model.status.StateEvent;
 
 import java.time.LocalDateTime;
 import java.util.List;

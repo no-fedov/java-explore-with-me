@@ -48,9 +48,7 @@ public class EventPrivateServiceImp implements EventService {
                 eventDto.getLocation());
         newEvent.setCreatedOn(LocalDateTime.now());
         newEvent.setState(StateEvent.PENDING);
-        System.out.println("НАЧИНАЕМ СОХРАНЯТЬ");
         eventRepository.save(newEvent);
-        System.out.println("СОХРАНИЛИ");
         return eventDtoFromEvent(newEvent);
     }
 
