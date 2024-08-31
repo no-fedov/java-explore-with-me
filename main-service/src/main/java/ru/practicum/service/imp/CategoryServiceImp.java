@@ -9,6 +9,7 @@ import ru.practicum.exception.CategoryActionException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Category;
 import ru.practicum.repository.CategoryRepository;
+import ru.practicum.repository.EventRepository;
 import ru.practicum.service.CategoryService;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import static ru.practicum.dto.mapper.CategoryMapper.*;
 @Slf4j
 public class CategoryServiceImp implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public CategoryDto addCategory(CategoryDto categoryDto) {
@@ -34,6 +36,7 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     public void deleteCategory(Long id) {
         log.info("delete category where id = {}", id);
+        checkPresentEventWithCurrentCategory(id);
         categoryRepository.deleteById(id);
     }
 
@@ -68,6 +71,12 @@ public class CategoryServiceImp implements CategoryService {
         Optional<Category> categoryByName = categoryRepository.findByName(name);
         if (categoryByName.isPresent()) {
             throw new CategoryActionException("Дублирование имени категории");
+        }
+    }
+
+    private void checkPresentEventWithCurrentCategory(Long categoryId) {
+        if (eventRepository.countByCategory_Id(categoryId) > 0) {
+            throw new CategoryActionException("нельзя удалить категория, так как есть события с этой категорией");
         }
     }
 }
