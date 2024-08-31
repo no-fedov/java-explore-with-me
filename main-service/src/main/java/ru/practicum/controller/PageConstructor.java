@@ -8,6 +8,6 @@ import org.springframework.data.domain.Pageable;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PageConstructor {
     public static Pageable getPage(Integer from, Integer size) {
-        return PageRequest.of(from, size);
+        return PageRequest.of(from / size, size);
     }
 }

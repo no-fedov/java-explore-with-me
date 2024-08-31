@@ -155,6 +155,5 @@ public class RequestServiceImp implements RequestService {
         if (currentEvent.getParticipantLimit() > 0 && confirmedParticipantEvent >= currentEvent.getParticipantLimit()) {
             throw new RequestActionException("Достигнут лимит участников");
         }
-
     }
 }
