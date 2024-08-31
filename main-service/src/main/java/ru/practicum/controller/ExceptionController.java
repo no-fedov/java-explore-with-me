@@ -8,6 +8,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.exception.NoValidParameter;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.EventActionException;
 import ru.practicum.exception.RequestActionException;
@@ -42,6 +43,12 @@ public class ExceptionController {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFoundEntity(RuntimeException e) {
+        return Map.of("Ошибка: ", e.getMessage());
+    }
+
+    @ExceptionHandler(NoValidParameter.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String,String> handleNoValidParameter(RuntimeException e) {
         return Map.of("Ошибка: ", e.getMessage());
     }
 

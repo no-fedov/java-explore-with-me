@@ -1,5 +1,6 @@
 package ru.practicum.controller.admin_api;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -50,12 +51,13 @@ public class EventAdminController {
                 .rangeEnd(endTime)
                 .page(PageConstructor.getPage(from, size))
                 .build();
+        parameters.checkValid();
         return eventAdminService.getEvents(parameters);
     }
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
-                                    @RequestBody UpdateEventAdminRequest eventDto) {
+                                    @Valid @RequestBody UpdateEventAdminRequest eventDto) {
         log.info("PATCH /admin/events/{eventId} eventId = {} body = {}", eventId, eventDto);
         return eventAdminService.updateEvent(eventId, eventDto);
     }

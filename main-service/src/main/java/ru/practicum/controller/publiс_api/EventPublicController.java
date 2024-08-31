@@ -42,6 +42,7 @@ public class EventPublicController {
                 .onlyAvailable(onlyAvailable)
                 .page(PageConstructor.getPage(from, size))
                 .build();
+        parameters.checkValid();
         return eventPublicService.findEvents(parameters);
     }
 
