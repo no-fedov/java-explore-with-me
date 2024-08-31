@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.dto.LocationDto;
 
 import java.time.LocalDateTime;
@@ -24,6 +23,6 @@ public class UpdateEventAdminRequest {
     private Boolean paid;
     private Long participantLimit;
     private Boolean requestModeration;
-    private StateEventAdmin stateAction;
+    private StateActionAdmin stateAction;
     private String title;
 }

@@ -1,5 +1,6 @@
 package ru.practicum.service.imp;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -49,7 +50,8 @@ public class EventPublicServiceImp implements EventPublicService {
                         event.requestModeration,
                         event.state,
                         event.createdOn))
-                .from(event).leftJoin(event.location, location)
+                .from(event)
+                .leftJoin(event.location, location)
                 .leftJoin(event.initiator, user)
                 .leftJoin(event.category, category);
 
@@ -58,8 +60,12 @@ public class EventPublicServiceImp implements EventPublicService {
         }
 
         if (parameters.getText() != null && !parameters.getText().trim().isEmpty()) {
-            query.where(event.description.like("*" + parameters.getText() + "*")
-                    .or(event.title.like("*" + parameters.getText() + "*")));
+            String searchText = "%" + parameters.getText().trim() + "%";
+            BooleanBuilder conditionForSearch = new BooleanBuilder();
+            conditionForSearch.or(event.description.likeIgnoreCase(searchText))
+                    .or(event.title.likeIgnoreCase(searchText))
+                    .or(event.annotation.likeIgnoreCase(searchText));
+            query.where(conditionForSearch);
         }
 
         if (parameters.getPaid() != null) {

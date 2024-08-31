@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
+import ru.practicum.dto.event.StateActionUser;
 import ru.practicum.dto.event.UpdateEventUserRequest;
 import ru.practicum.dto.mapper.EventMapper;
 import ru.practicum.dto.user.UserDto;
@@ -66,6 +67,13 @@ public class EventPrivateServiceImp implements EventService {
         if (event.getTime().isBefore(LocalDateTime.now().minusHours(2))) {
             throw new EventActionException("дата и время на которые намечено событие не может быть раньше," +
                     " чем через два часа от текущего момента");
+        }
+        if (eventUpdateDto.getStateAction() != null) {
+            if (eventUpdateDto.getStateAction() == StateActionUser.CANCEL_REVIEW) {
+                event.setState(StateEvent.CANCELED);
+            } else {
+                event.setState(StateEvent.PENDING);
+            }
         }
         convertToEventFromUpdateEventUserRequest(event, eventUpdateDto);
         eventRepository.save(event);

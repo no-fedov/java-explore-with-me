@@ -30,5 +30,5 @@ public class UpdateEventUserRequest {
     private Boolean requestModeration;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdOn;
-    private StateEventAdmin stateAction;
+    private StateActionUser stateAction;
 }

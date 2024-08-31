@@ -65,14 +65,14 @@ public class RequestServiceImp implements RequestService {
     }
 
     @Override
-    public RequestDto rejectRequest(Long userId, Long requestId) {
+    public RequestDto cancelRequest(Long userId, Long requestId) {
         List<Request> currentRequest = requestRepository.findByIdAndRequester_Id(requestId, userId);
         if (currentRequest.isEmpty()) {
             throw new NotFoundException("Пользователь не подавал заявку на участие в событии " +
                     "поэтому нельзя отменить участие в том в чем не участвуешь");
         }
         Request request = currentRequest.getFirst();
-        request.setStatus(RequestStatus.REJECTED);
+        request.setStatus(RequestStatus.CANCELED);
         requestRepository.save(request);
         return RequestMapper.convertToRequestDto(request);
     }

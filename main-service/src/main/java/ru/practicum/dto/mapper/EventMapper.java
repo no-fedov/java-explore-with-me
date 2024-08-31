@@ -97,13 +97,6 @@ public class EventMapper {
         if (eventUpdateDto.getCreatedOn() != null) {
             event.setCreatedOn(eventUpdateDto.getCreatedOn());
         }
-        if (eventUpdateDto.getStateAction() != null) {
-            if (eventUpdateDto.getStateAction() == StateEventAdmin.CANCEL_REVIEW) {
-                event.setState(StateEvent.CANCELED);
-            } else {
-                event.setState(StateEvent.PENDING);
-            }
-        }
         return event;
     }
 
@@ -143,17 +136,19 @@ public class EventMapper {
             event.setRequestModeration(eventDto.getRequestModeration());
         }
 
-        if (eventDto.getStateAction() != null) {
-            if (eventDto.getStateAction() == StateEventAdmin.PUBLISH_EVENT) {
-                event.setState(StateEvent.PUBLISHED);
-            }
-            if (eventDto.getStateAction() == StateEventAdmin.CANCEL_REVIEW) {
-                event.setState(StateEvent.CANCELED);
-            }
-            if (eventDto.getStateAction() == StateEventAdmin.SEND_TO_REVIEW) {
-                event.setState(StateEvent.PENDING);
-            }
-        }
+        //эту логику от сюда убрать, относится к бизнес логике
+//        if (eventDto.getStateAction() != null) {
+//            if (eventDto.getStateAction() == StateEventDto.PUBLISH_EVENT) {
+//                event.setState(StateEvent.PUBLISHED);
+//            }
+//            if (eventDto.getStateAction() == StateEventDto.CANCEL_REVIEW || eventDto.getStateAction() == StateEventDto.REJECT_EVENT) {
+//                event.setState(StateEvent.CANCELED);
+//            }
+//
+//            if (eventDto.getStateAction() == StateEventDto.SEND_TO_REVIEW) {
+//                event.setState(StateEvent.PENDING);
+//            }
+//        }
         return event;
     }
 

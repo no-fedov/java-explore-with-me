@@ -40,6 +40,6 @@ public class RequestPrivateController {
     @PatchMapping("/{userId}/requests/{requestId}/cancel")
     public RequestDto cancelRequest(@PathVariable Long userId, @PathVariable Long requestId) {
         log.info("PATCH users/{userId}/requests/{requestId}/cancel userId = {} requestId = {}", userId, requestId);
-        return requestService.rejectRequest(userId, requestId);
+        return requestService.cancelRequest(userId, requestId);
     }
 }

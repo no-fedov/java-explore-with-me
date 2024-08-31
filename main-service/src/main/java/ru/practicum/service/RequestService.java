@@ -11,9 +11,9 @@ public interface RequestService {
 
     List<RequestDto> getRequestsUser(Long userId);
 
-    RequestDto rejectRequest(Long userId, Long requestId);
+    RequestDto cancelRequest(Long userId, Long requestId);
 
     List<RequestDto> getRequestByEvent(Long userId, Long eventId);
 
-    EventRequestStatusUpdateResult updateStatusRequest(Long userId, Long eventId, EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) ;
+    EventRequestStatusUpdateResult updateStatusRequest(Long userId, Long eventId, EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest);
 }

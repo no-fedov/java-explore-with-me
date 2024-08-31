@@ -10,7 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.LocationDto;
-import ru.practicum.dto.event.*;
+import ru.practicum.dto.event.EventFullDto;
+import ru.practicum.dto.event.StateActionAdmin;
+import ru.practicum.dto.event.URLParameterEventAdmin;
+import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.mapper.EventMapper;
 import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.exception.EventActionException;
@@ -49,28 +52,28 @@ public class EventAdminServiceImp implements EventAdminService {
                         .and(request.status.eq(RequestStatus.CONFIRMED)));
 
         JPAQuery<EventFullDto> eventsQuery = queryFactory.select(Projections.constructor(EventFullDto.class,
-                        event.id,
-                        Projections.constructor(UserShortDto.class,
-                                user.id,
-                                user.name),
-                        Projections.constructor(CategoryDto.class,
-                                category.id,
-                                category.name),
-                        Projections.constructor(LocationDto.class,
-                                location.locationId.lat,
-                                location.locationId.lon),
-                        event.title,
-                        event.annotation,
-                        event.description,
-                        event.participantLimit,
-                        confirmedRequestCount, // confirmedRequest
-                        event.paid,
-                        event.requestModeration,
-                        event.state,
-                        event.createdOn,
-                        event.time,
-                        event.publishedOn,
-                        Expressions.constant(0L)
+                                event.id,
+                                Projections.constructor(UserShortDto.class,
+                                        user.id,
+                                        user.name),
+                                Projections.constructor(CategoryDto.class,
+                                        category.id,
+                                        category.name),
+                                Projections.constructor(LocationDto.class,
+                                        location.locationId.lat,
+                                        location.locationId.lon),
+                                event.title,
+                                event.annotation,
+                                event.description,
+                                event.participantLimit,
+                                confirmedRequestCount, // confirmedRequest
+                                event.paid,
+                                event.requestModeration,
+                                event.state,
+                                event.createdOn,
+                                event.time,
+                                event.publishedOn,
+                                Expressions.constant(0L)
                         )
                 )
                 .from(event)
@@ -80,10 +83,16 @@ public class EventAdminServiceImp implements EventAdminService {
                 .leftJoin(request).on(request.event.id.eq(event.id).and(request.status.eq(RequestStatus.CONFIRMED)))
                 .where(event.initiator.id.in(parameters.getUsers()))
                 .where(event.state.in(parameters.getStates().stream().map(e -> StateEvent.valueOf(e)).toList()))
-                .where(event.category.id.in(parameters.getCategories()))
-                .where(event.time.goe(parameters.getRangeStart()))
-                .where(event.time.loe(parameters.getRangeEnd()))
-                .offset(parameters.getPage().getOffset())
+                .where(event.category.id.in(parameters.getCategories()));
+
+        if (parameters.getRangeStart() != null) {
+            eventsQuery.where(event.time.goe(parameters.getRangeStart()));
+        }
+        if (parameters.getRangeEnd() != null) {
+            eventsQuery.where(event.time.loe(parameters.getRangeEnd()));
+        }
+
+        eventsQuery.offset(parameters.getPage().getOffset())
                 .limit(parameters.getPage().getPageSize());
         return eventsQuery.fetch();
     }
@@ -99,16 +108,23 @@ public class EventAdminServiceImp implements EventAdminService {
             throw new EventActionException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
         }
 
-        if (eventDto.getStateAction() == StateEventAdmin.PUBLISH_EVENT
+        if (eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT
                 && event.getState() != StateEvent.PENDING) {
             throw new EventActionException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
         }
 
-        if (eventDto.getStateAction() == StateEventAdmin.CANCEL_REVIEW
+        if (eventDto.getStateAction() == StateActionAdmin.REJECT_EVENT
                 && event.getState() == StateEvent.PUBLISHED) {
             throw new EventActionException("Событие можно отклонить, только если оно еще не опубликовано");
         }
 
+        if (eventDto.getStateAction() != null) {
+            if (eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT) {
+                event.setState(StateEvent.PUBLISHED);
+            } else {
+                event.setState(StateEvent.CANCELED);
+            }
+        }
         convertToUpdatedEventDtoFromEventAndUpdateEventAdmin(event, eventDto);
         eventRepository.save(event);
         return EventMapper.convertToEventFullDtoFromEvent(event);

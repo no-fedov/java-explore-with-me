@@ -17,5 +17,6 @@ public class URLParameterEventPublic {
     private LocalDateTime rangeEnd;
     private Boolean onlyAvailable;
     private Pageable page;
+    private SortType sort;
 }
 
