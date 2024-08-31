@@ -49,7 +49,9 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         Category category = findCategoryById(categoryDto.getId());
-        checkNameDuplication(categoryDto.getName());
+        if (!categoryDto.getName().equals(category.getName())) {
+            checkNameDuplication(categoryDto.getName());
+        }
         category.setName(categoryDto.getName());
         categoryRepository.save(category);
         log.info("updated Category: {}", category);
