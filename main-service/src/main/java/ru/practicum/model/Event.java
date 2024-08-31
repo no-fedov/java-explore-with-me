@@ -24,8 +24,8 @@ public class Event {
     private User initiator;
 
     @ToString.Exclude
-    @OneToOne
-    @JoinColumn(name = "category_id", nullable = true)
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(length = 120)

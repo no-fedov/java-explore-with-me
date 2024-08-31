@@ -45,7 +45,7 @@ public class RequestServiceImp implements RequestService {
         Event currentEvent = eventRepository.findById(requestDto.getEvent())
                 .orElseThrow(() -> new NotFoundException("Событие с id=" + requestDto.getEvent() + " не найдено."));
 
-        if (currentEvent.getRequestModeration()) {
+        if (currentEvent.getRequestModeration() && currentEvent.getParticipantLimit() > 0) {
             requestDto.setStatus(RequestStatus.PENDING);
         } else {
             requestDto.setStatus(RequestStatus.CONFIRMED);
@@ -149,10 +149,11 @@ public class RequestServiceImp implements RequestService {
             }
         }
 
-        long potentialParticipants = requestRepository
-                .countPotentialParticipants(queryFactory, currentEvent.getId());
-        if (potentialParticipants >= currentEvent.getParticipantLimit()) {
-            throw new EventActionException("Достигнут лимит запросов на участие");
+        if (currentEvent.getParticipantLimit() > 0) {
+            long potentialParticipants = requestRepository.countPotentialParticipants(queryFactory, currentEvent.getId());
+            if (potentialParticipants >= currentEvent.getParticipantLimit()) {
+                throw new EventActionException("Достигнут лимит запросов на участие");
+            }
         }
     }
 }

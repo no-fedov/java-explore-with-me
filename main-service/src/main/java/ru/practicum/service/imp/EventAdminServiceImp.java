@@ -17,6 +17,7 @@ import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.mapper.EventMapper;
 import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.exception.EventActionException;
+import ru.practicum.exception.NoValidParameter;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.*;
 import ru.practicum.model.status.RequestStatus;
@@ -80,18 +81,26 @@ public class EventAdminServiceImp implements EventAdminService {
                 .leftJoin(event.initiator, user)
                 .leftJoin(event.category, category)
                 .leftJoin(event.location, location)
-                .leftJoin(request).on(request.event.id.eq(event.id).and(request.status.eq(RequestStatus.CONFIRMED)))
-                .where(event.initiator.id.in(parameters.getUsers()))
-                .where(event.state.in(parameters.getStates().stream().map(e -> StateEvent.valueOf(e)).toList()))
-                .where(event.category.id.in(parameters.getCategories()));
+                .leftJoin(request).on(request.event.id.eq(event.id));
 
+        if (!parameters.getStates().isEmpty()) {
+            eventsQuery.where(event.state.in(parameters.getStates().stream().map(StateEvent::valueOf).toList()));
+        }
+        if (!parameters.getUsers().isEmpty()) {
+            eventsQuery.where(event.initiator.id.in(parameters.getUsers()));
+        }
+        if (!parameters.getCategories().isEmpty()) {
+            eventsQuery.where(event.category.id.in(parameters.getCategories()));
+        }
+        if (!parameters.getUsers().isEmpty()) {
+            eventsQuery.where(event.initiator.id.in(parameters.getUsers()));
+        }
         if (parameters.getRangeStart() != null) {
             eventsQuery.where(event.time.goe(parameters.getRangeStart()));
         }
         if (parameters.getRangeEnd() != null) {
             eventsQuery.where(event.time.loe(parameters.getRangeEnd()));
         }
-
         eventsQuery.offset(parameters.getPage().getOffset())
                 .limit(parameters.getPage().getPageSize());
         return eventsQuery.fetch();
@@ -101,11 +110,12 @@ public class EventAdminServiceImp implements EventAdminService {
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest eventDto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("нет события с  id = " + eventId + ";"));
-        LocalDateTime startTime = event.getTime();
+        LocalDateTime startTime = eventDto.getEventDate();
 //        Category category = categoryRepository.findById(eventDto.getCategory())
 
-        if (startTime.isBefore(LocalDateTime.now().minusHours(1))) {
-            throw new EventActionException("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
+        if (startTime != null
+                && startTime.isBefore(LocalDateTime.now().minusHours(1))) {
+            throw new NoValidParameter("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
         }
 
         if (eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT
@@ -119,11 +129,10 @@ public class EventAdminServiceImp implements EventAdminService {
         }
 
         if (eventDto.getStateAction() != null) {
-            if (eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT) {
-                event.setState(StateEvent.PUBLISHED);
-            } else {
-                event.setState(StateEvent.CANCELED);
-            }
+            event.setState(eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT
+                    ? StateEvent.PUBLISHED
+                    : StateEvent.CANCELED
+            );
         }
         convertToUpdatedEventDtoFromEventAndUpdateEventAdmin(event, eventDto);
         eventRepository.save(event);

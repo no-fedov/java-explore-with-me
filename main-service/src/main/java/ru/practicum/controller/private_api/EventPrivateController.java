@@ -31,7 +31,7 @@ public class EventPrivateController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventShortDto postEvent(@PositiveOrZero @PathVariable Long userId,
                                    @Valid @RequestBody NewEventDto eventDto) {
-
+        eventDto.checkValid();
         log.info("POST /users/{userId}/events userId = {} , body = {}", userId, eventDto);
         return eventService.addEvent(userId, eventDto);
     }

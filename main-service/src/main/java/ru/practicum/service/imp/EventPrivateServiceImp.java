@@ -11,6 +11,7 @@ import ru.practicum.dto.event.UpdateEventUserRequest;
 import ru.practicum.dto.mapper.EventMapper;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.exception.EventActionException;
+import ru.practicum.exception.NoValidParameter;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Event;
 import ru.practicum.model.status.StateEvent;
@@ -47,33 +48,38 @@ public class EventPrivateServiceImp implements EventService {
                 eventDto.getLocation());
         newEvent.setCreatedOn(LocalDateTime.now());
         newEvent.setState(StateEvent.PENDING);
+        System.out.println("НАЧИНАЕМ СОХРАНЯТЬ");
         eventRepository.save(newEvent);
+        System.out.println("СОХРАНИЛИ");
         return eventDtoFromEvent(newEvent);
     }
 
     @Override
     public EventShortDto updateEvent(UpdateEventUserRequest eventUpdateDto) {
         Event event = findEventById(eventUpdateDto.getId());
+
         if (eventUpdateDto.getCategory() != null) {
             categoryService.findCategory(eventUpdateDto.getCategory());
         }
+
         //обновить категории забыл я
         if (!event.getInitiator().getId().equals(eventUpdateDto.getInitiator())) {
             throw new NotFoundException("Event with id=" + eventUpdateDto.getId() + "was not found");
         }
+
         if (event.getState() == StateEvent.PUBLISHED) {
             throw new EventActionException("Нельзя изменять опубликованное событие");
         }
-        if (event.getTime().isBefore(LocalDateTime.now().minusHours(2))) {
-            throw new EventActionException("дата и время на которые намечено событие не может быть раньше," +
+
+        if (eventUpdateDto.getEventDate() != null && eventUpdateDto.getEventDate().isBefore(LocalDateTime.now().minusHours(2))) {
+            throw new NoValidParameter("дата и время на которые намечено событие не может быть раньше," +
                     " чем через два часа от текущего момента");
         }
+
         if (eventUpdateDto.getStateAction() != null) {
-            if (eventUpdateDto.getStateAction() == StateActionUser.CANCEL_REVIEW) {
-                event.setState(StateEvent.CANCELED);
-            } else {
-                event.setState(StateEvent.PENDING);
-            }
+            event.setState(eventUpdateDto.getStateAction() == StateActionUser.CANCEL_REVIEW
+                    ? StateEvent.CANCELED
+                    : StateEvent.PENDING);
         }
         convertToEventFromUpdateEventUserRequest(event, eventUpdateDto);
         eventRepository.save(event);

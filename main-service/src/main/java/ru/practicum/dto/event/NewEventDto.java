@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.dto.LocationDto;
+import ru.practicum.exception.NoValidParameter;
 
 import java.time.LocalDateTime;
 
@@ -43,4 +44,11 @@ public class NewEventDto {
     private LocationDto location;
     private Boolean paid;
     private Boolean requestModeration;
+
+    public void checkValid() {
+        if (eventDate != null && eventDate.isBefore(LocalDateTime.now().minusHours(2))) {
+            throw new NoValidParameter("дата и время на которые намечено событие не может быть раньше," +
+                    " чем через два часа от текущего момента");
+        }
+    }
 }

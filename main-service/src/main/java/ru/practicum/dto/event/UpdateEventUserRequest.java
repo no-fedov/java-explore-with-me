@@ -28,7 +28,7 @@ public class UpdateEventUserRequest {
     private LocationDto location;
     private Boolean paid;
     private Boolean requestModeration;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdOn;
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    private LocalDateTime createdOn;
     private StateActionUser stateAction;
 }

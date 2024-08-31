@@ -52,6 +52,7 @@ public class EventAdminController {
                 .page(PageConstructor.getPage(from, size))
                 .build();
         parameters.checkValid();
+        log.info("GET /admin/events with parameters = {}",parameters);
         return eventAdminService.getEvents(parameters);
     }
 

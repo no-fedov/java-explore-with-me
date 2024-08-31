@@ -94,9 +94,9 @@ public class EventMapper {
         if (eventUpdateDto.getPaid() != null) {
             event.setPaid(eventUpdateDto.getPaid());
         }
-        if (eventUpdateDto.getCreatedOn() != null) {
-            event.setCreatedOn(eventUpdateDto.getCreatedOn());
-        }
+//        if (eventUpdateDto.getCreatedOn() != null) {
+//            event.setCreatedOn(eventUpdateDto.getCreatedOn());
+//        }
         return event;
     }
 
@@ -112,6 +112,7 @@ public class EventMapper {
 //        if (eventDto.getCategory() != null) {
 //            event.setCategory();
 //        }
+//        if (локация)
         if (eventDto.getDescription() != null && !eventDto.getDescription().isBlank()) {
             event.setDescription(eventDto.getDescription());
         }
@@ -123,7 +124,6 @@ public class EventMapper {
         if (eventDto.getEventDate() != null) {
             event.setTime(eventDto.getEventDate());
         }
-//        if (локация)
         if (eventDto.getPaid() != null) {
             event.setPaid(eventDto.getPaid());
         }
@@ -135,20 +135,6 @@ public class EventMapper {
         if (eventDto.getRequestModeration() != null) {
             event.setRequestModeration(eventDto.getRequestModeration());
         }
-
-        //эту логику от сюда убрать, относится к бизнес логике
-//        if (eventDto.getStateAction() != null) {
-//            if (eventDto.getStateAction() == StateEventDto.PUBLISH_EVENT) {
-//                event.setState(StateEvent.PUBLISHED);
-//            }
-//            if (eventDto.getStateAction() == StateEventDto.CANCEL_REVIEW || eventDto.getStateAction() == StateEventDto.REJECT_EVENT) {
-//                event.setState(StateEvent.CANCELED);
-//            }
-//
-//            if (eventDto.getStateAction() == StateEventDto.SEND_TO_REVIEW) {
-//                event.setState(StateEvent.PENDING);
-//            }
-//        }
         return event;
     }
 
