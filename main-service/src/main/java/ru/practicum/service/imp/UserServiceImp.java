@@ -7,13 +7,18 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.mapper.UserMapper;
 import ru.practicum.dto.user.NewUserRequest;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.exception.CategoryActionException;
+import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.UserActionException;
 import ru.practicum.model.User;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
-import static ru.practicum.dto.mapper.UserMapper.*;
+import static ru.practicum.dto.mapper.UserMapper.convertToUserDtoFromUser;
+import static ru.practicum.dto.mapper.UserMapper.listUserDtoFroUser;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +28,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDto addUser(NewUserRequest newUserRequest) {
-
+        checkEmailDuplication(newUserRequest.getEmail());
         User user = UserMapper.convertToUserFromNewUserRequest(newUserRequest);
         userRepository.save(user);
         log.info("saved User: {}", user);
@@ -52,6 +57,14 @@ public class UserServiceImp implements UserService {
     }
 
     private User findUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException());
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("пользователь с id = "
+                + id + "не найден"));
+    }
+
+    private void checkEmailDuplication(String email) {
+        Optional<User> categoryByName = userRepository.findByEmail(email);
+        if (categoryByName.isPresent()) {
+            throw new UserActionException("Дублирование имени категории");
+        }
     }
 }
