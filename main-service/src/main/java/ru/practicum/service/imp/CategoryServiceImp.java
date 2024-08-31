@@ -5,12 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
+import ru.practicum.exception.CategoryActionException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Category;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.service.CategoryService;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ru.practicum.dto.mapper.CategoryMapper.*;
 
@@ -22,6 +24,7 @@ public class CategoryServiceImp implements CategoryService {
 
     @Override
     public CategoryDto addCategory(CategoryDto categoryDto) {
+        checkNameDuplication(categoryDto.getName());
         Category category = categoryFromCategoryDto(categoryDto);
         categoryRepository.save(category);
         log.info("saved category: {}", category);
@@ -43,6 +46,7 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         Category category = findCategoryById(categoryDto.getId());
+        checkNameDuplication(categoryDto.getName());
         category.setName(categoryDto.getName());
         categoryRepository.save(category);
         log.info("updated Category: {}", category);
@@ -58,5 +62,12 @@ public class CategoryServiceImp implements CategoryService {
 
     private Category findCategoryById(Long id) {
         return categoryRepository.findById(id).orElseThrow(() -> new NotFoundException("Такой категории не найдено"));
+    }
+
+    private void checkNameDuplication(String name) {
+        Optional<Category> categoryByName = categoryRepository.findByName(name);
+        if (categoryByName.isPresent()) {
+            throw new CategoryActionException("Дублирование имени категории");
+        }
     }
 }
