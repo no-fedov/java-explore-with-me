@@ -105,6 +105,11 @@ public class RequestServiceImp implements RequestService {
                     "если уже достигнут лимит по заявкам на данное событие");
         }
 
+        if (eventRequestStatusUpdateRequest.getStatus() == EventRequestStatus.REJECTED
+                && requestRepository.containConfirmedRequestInList(queryFactory, eventRequestStatusUpdateRequest.getRequestIds()) > 0) {
+            throw new RequestActionException("Попытка отменить уже принятую заявку на участие в событии");
+        }
+
         List<Request> requests = queryFactory.select(request).from(request)
                 .where(request.event.id.eq(eventId))
                 .where(request.id.in(eventRequestStatusUpdateRequest.getRequestIds()))
