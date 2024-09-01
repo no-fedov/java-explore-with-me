@@ -7,24 +7,24 @@ import ru.practicum.model.Event;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RequestMapper {
-    public static Request convertRequestDtoToRequest(RequestDto requestDto, User user, Event event) {
+    public static Request convertToRequestFromEventAndUser(User user, Event event) {
         return Request.builder()
-                .id(requestDto.getId())
                 .requester(user)
                 .event(event)
-                .created(requestDto.getCreated())
-                .status(requestDto.getStatus())
+                .created(LocalDateTime.now())
                 .build();
     }
 
     public static RequestDto convertToRequestDto(Request request) {
         return RequestDto.builder()
-                .status(request.getStatus())
                 .id(request.getId())
+                .status(request.getStatus())
                 .created(request.getCreated())
                 .event(request.getEvent().getId())
                 .requester(request.getRequester().getId())

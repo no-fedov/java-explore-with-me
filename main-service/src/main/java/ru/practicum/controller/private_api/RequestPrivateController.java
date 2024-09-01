@@ -22,13 +22,8 @@ public class RequestPrivateController {
     @PostMapping("/{userId}/requests")
     @ResponseStatus(HttpStatus.CREATED)
     public RequestDto postRequest(@PathVariable Long userId, @RequestParam Long eventId) {
-        RequestDto requestDto = RequestDto.builder()
-                .requester(userId)
-                .event(eventId)
-                .created(LocalDateTime.now())
-                .build();
-        log.info("POST /users/{userId}/requests  userId = {}, body = {}", userId, requestDto);
-        return requestService.addRequest(requestDto);
+        log.info("POST /users/{userId}/requests  userId = {}, eventId = {}", userId, eventId);
+        return requestService.addRequest(userId, eventId);
     }
 
     @GetMapping("/{userId}/requests")

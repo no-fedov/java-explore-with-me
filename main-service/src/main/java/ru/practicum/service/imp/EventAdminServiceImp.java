@@ -137,7 +137,7 @@ public class EventAdminServiceImp implements EventAdminService {
 
         // искуственно вещаю количество просмотров
         // и добавляю количесвто одобренных запросов
-        Long confirmedRequestCounter = requestRepository.countPotentialParticipants(queryFactory, eventId);
+        Long confirmedRequestCounter = requestRepository.countParticipants(queryFactory, eventId);
         eventFullDto.setConfirmedRequests(confirmedRequestCounter);
         eventFullDto.setViews(0L);
         return eventFullDto;

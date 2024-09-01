@@ -15,12 +15,21 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     List<Request> findByRequester_Id(Long userId);
 
+    default Long countParticipants(JPAQueryFactory queryFactory, Long eventId) {
+        QRequest request = QRequest.request;
+        return queryFactory.select(request.count())
+                .from(request)
+                .where(request.event.id.eq(eventId))
+                .where(request.status.eq(RequestStatus.CONFIRMED))
+                .fetchOne();
+    }
+
     default Long countPotentialParticipants(JPAQueryFactory queryFactory, Long eventId) {
         QRequest request = QRequest.request;
         return queryFactory.select(request.count())
                 .from(request)
-                .where(request.event.id.eq(eventId)
-                        .and(request.status.ne(RequestStatus.REJECTED)))
+                .where(request.event.id.eq(eventId))
+                .where(request.status.eq(RequestStatus.CONFIRMED).or(request.status.eq(RequestStatus.PENDING)))
                 .fetchOne();
     }
 }

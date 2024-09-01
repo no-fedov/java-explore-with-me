@@ -2,6 +2,7 @@ package ru.practicum.service.imp;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,9 @@ import ru.practicum.service.RequestService;
 
 import java.util.List;
 
-import static ru.practicum.dto.mapper.RequestMapper.convertRequestDtoToRequest;
+import static ru.practicum.dto.mapper.RequestMapper.convertToRequestDto;
+import static ru.practicum.dto.mapper.RequestMapper.convertToRequestFromEventAndUser;
+
 
 @Service
 @RequiredArgsConstructor
@@ -38,33 +41,30 @@ public class RequestServiceImp implements RequestService {
     private final JPAQueryFactory queryFactory;
     private final QRequest request = QRequest.request;
 
+    @Transactional
     @Override
-    public RequestDto addRequest(RequestDto requestDto) {
-        User currentUser = userRepository.findById(requestDto.getRequester())
-                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + requestDto.getRequester() + " не найден."));
-        Event currentEvent = eventRepository.findById(requestDto.getEvent())
-                .orElseThrow(() -> new NotFoundException("Событие с id=" + requestDto.getEvent() + " не найдено."));
-
-        if (currentEvent.getParticipantLimit() == 0) {
-            requestDto.setStatus(RequestStatus.CONFIRMED);
-        } else {
-            requestDto.setStatus(RequestStatus.PENDING);
-        }
-
-        validRequest(requestDto, currentUser, currentEvent);
-        Request newRequest = convertRequestDtoToRequest(requestDto, currentUser, currentEvent);
+    public RequestDto addRequest(Long userId, Long eventId) {
+        User currentUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id=" + userId + " не найден."));
+        Event currentEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id=" + eventId + " не найдено."));
+        validRequest(currentUser, currentEvent);
+        Request newRequest = convertToRequestFromEventAndUser(currentUser, currentEvent);
+        setStatus(newRequest);
         requestRepository.save(newRequest);
-        log.info("Save request {}", newRequest);
-        requestDto.setId(newRequest.getId());
+        RequestDto requestDto = convertToRequestDto(newRequest);
+        log.info("Save request {}", requestDto);
         return requestDto;
     }
 
+    @Transactional
     @Override
     public List<RequestDto> getRequestsUser(Long userId) {
         List<Request> requests = requestRepository.findByRequester_Id(userId);
         return RequestMapper.convertToRequestDtoList(requests);
     }
 
+    @Transactional
     @Override
     public RequestDto cancelRequest(Long userId, Long requestId) {
         List<Request> currentRequest = requestRepository.findByIdAndRequester_Id(requestId, userId);
@@ -75,9 +75,10 @@ public class RequestServiceImp implements RequestService {
         Request request = currentRequest.getFirst();
         request.setStatus(RequestStatus.CANCELED);
         requestRepository.save(request);
-        return RequestMapper.convertToRequestDto(request);
+        return convertToRequestDto(request);
     }
 
+    @Transactional
     @Override
     public List<RequestDto> getRequestByEvent(Long userId, Long eventId) {
         JPAQuery<Request> query = queryFactory
@@ -89,10 +90,20 @@ public class RequestServiceImp implements RequestService {
         return RequestMapper.convertToRequestDtoList(request);
     }
 
+    @Transactional
     @Override
-    public EventRequestStatusUpdateResult updateStatusRequest(Long userId, Long eventId, EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
+    public EventRequestStatusUpdateResult updateStatusRequest(Long userId,
+                                                              Long eventId,
+                                                              EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
         Event event = eventRepository.findByIdAndInitiator_Id(eventId, userId)
                 .orElseThrow(() -> new NotFoundException("У пользователя c номером {} нет события под id = {}"));
+
+        if (event.getParticipantLimit() != 0
+                && eventRequestStatusUpdateRequest.getStatus() == EventRequestStatus.CONFIRMED
+                && requestRepository.countParticipants(queryFactory, eventId) >= event.getParticipantLimit()) {
+            throw new RequestActionException("нельзя подтвердить заявку, " +
+                    "если уже достигнут лимит по заявкам на данное событие");
+        }
 
         List<Request> requests = queryFactory.select(request).from(request)
                 .where(request.event.id.eq(eventId))
@@ -110,7 +121,7 @@ public class RequestServiceImp implements RequestService {
 
         int confirmedCount = 0;
         Long participantLimit = event.getParticipantLimit();
-        Long confirmedParticipants = requestRepository.countPotentialParticipants(queryFactory, eventId);
+        Long confirmedParticipants = requestRepository.countParticipants(queryFactory, eventId);
 
         for (Request req : requests) {
             if (confirmedParticipants >= participantLimit && participantLimit > 0) {
@@ -133,7 +144,7 @@ public class RequestServiceImp implements RequestService {
                 .build();
     }
 
-    private void validRequest(RequestDto requestDto, User currentUser, Event currentEvent) {
+    private void validRequest(User currentUser, Event currentEvent) {
         if (currentEvent.getInitiator().getId().equals(currentUser.getId())) {
             throw new RequestActionException("Инициатор события не может добавить запрос на участие в своём событии");
         }
@@ -142,7 +153,7 @@ public class RequestServiceImp implements RequestService {
             throw new EventActionException("Нельзя участвовать в неопубликованном событии");
         }
 
-        List<Request> request = requestRepository.findByRequester_IdAndEvent_Id(requestDto.getRequester(), requestDto.getEvent());
+        List<Request> request = requestRepository.findByRequester_IdAndEvent_Id(currentUser.getId(), currentEvent.getId());
         if (!request.isEmpty()) {
             if (request.getFirst().getStatus() == RequestStatus.PENDING
                     || request.getFirst().getStatus() == RequestStatus.CONFIRMED) {
@@ -150,10 +161,24 @@ public class RequestServiceImp implements RequestService {
             }
         }
 
-        Long confirmedParticipantEvent = requestRepository
-                .countPotentialParticipants(queryFactory, currentEvent.getId());
-        if (currentEvent.getParticipantLimit() > 0 && confirmedParticipantEvent >= currentEvent.getParticipantLimit()) {
+        Long participants = requestRepository
+                .countParticipants(queryFactory, currentEvent.getId());
+
+        if (participants >= currentEvent.getParticipantLimit() && currentEvent.getParticipantLimit() != 0) {
             throw new RequestActionException("Достигнут лимит участников");
         }
+    }
+
+    private void setStatus(Request request) {
+        Event currentEvent = request.getEvent();
+
+        if (currentEvent.getParticipantLimit() == 0) {
+            request.setStatus(RequestStatus.CONFIRMED);
+            return;
+        } else if (currentEvent.getRequestModeration()) {
+            request.setStatus(RequestStatus.PENDING);
+            return;
+        }
+        request.setStatus(RequestStatus.CONFIRMED);
     }
 }
