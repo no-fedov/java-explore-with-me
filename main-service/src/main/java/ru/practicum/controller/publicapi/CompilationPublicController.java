@@ -1,4 +1,4 @@
-package ru.practicum.controller.publiсapi;
+package ru.practicum.controller.publicapi;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

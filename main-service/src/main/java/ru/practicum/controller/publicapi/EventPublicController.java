@@ -1,4 +1,4 @@
-package ru.practicum.controller.publiсapi;
+package ru.practicum.controller.publicapi;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.PositiveOrZero;
