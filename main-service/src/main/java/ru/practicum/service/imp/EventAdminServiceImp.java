@@ -20,10 +20,10 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.*;
 import ru.practicum.model.status.RequestStatus;
 import ru.practicum.model.status.StateEvent;
-import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.RequestRepository;
 import ru.practicum.service.EventAdminService;
+import ru.practicum.stat.adapter.StatAdapter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +35,7 @@ import static ru.practicum.dto.mapper.EventMapper.convertToUpdatedEventDtoFromEv
 public class EventAdminServiceImp implements EventAdminService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
-    private final CategoryRepository categoryRepository;
+    private final StatAdapter statAdapter;
     private final JPAQueryFactory queryFactory;
     private final QEvent event = QEvent.event;
     private final QLocation location = QLocation.location;
@@ -98,7 +98,9 @@ public class EventAdminServiceImp implements EventAdminService {
         }
         eventsQuery.offset(parameters.getPage().getOffset())
                 .limit(parameters.getPage().getPageSize());
-        return eventsQuery.fetch();
+        List<EventFullDto> events = eventsQuery.fetch();
+        statAdapter.setStatsForEvent(events);
+        return events;
     }
 
     @Override
@@ -106,7 +108,6 @@ public class EventAdminServiceImp implements EventAdminService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("нет события с  id = " + eventId + ";"));
         LocalDateTime startTime = eventDto.getEventDate();
-//        Category category = categoryRepository.findById(eventDto.getCategory())
 
         if (startTime != null
                 && startTime.isBefore(LocalDateTime.now().minusHours(1))) {
@@ -135,11 +136,10 @@ public class EventAdminServiceImp implements EventAdminService {
         eventRepository.save(event);
         EventFullDto eventFullDto = EventMapper.convertToEventFullDtoFromEvent(event);
 
-        // искуственно вещаю количество просмотров
-        // и добавляю количесвто одобренных запросов
+
         Long confirmedRequestCounter = requestRepository.countParticipants(queryFactory, eventId);
         eventFullDto.setConfirmedRequests(confirmedRequestCounter);
-        eventFullDto.setViews(0L);
+        statAdapter.setStatsForEvent(List.of(eventFullDto));
         return eventFullDto;
     }
 }

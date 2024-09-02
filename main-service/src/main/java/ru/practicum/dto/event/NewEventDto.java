@@ -34,6 +34,7 @@ public class NewEventDto {
     @Size(min = 20, max = 7000)
     private String description;
 
+    @Builder.Default
     @PositiveOrZero
     private Long participantLimit = 0L;
 
@@ -42,7 +43,9 @@ public class NewEventDto {
     private LocalDateTime eventDate;
 
     private LocationDto location;
+    @Builder.Default
     private Boolean paid = false;
+    @Builder.Default
     private Boolean requestModeration = true;
 
     public void checkValid() {

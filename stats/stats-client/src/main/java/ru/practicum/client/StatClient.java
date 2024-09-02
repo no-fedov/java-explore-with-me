@@ -6,6 +6,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -15,6 +16,7 @@ import ru.practicum.dto.URLParameter;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class StatClient {
     private static final String HIT = "/hit";
     private static final String STATS = "/stats";
