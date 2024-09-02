@@ -117,8 +117,8 @@ public class EventPublicServiceImp implements EventPublicService {
                 .from(event)
                 .leftJoin(event.location, location)
                 .leftJoin(event.initiator, user)
-                .leftJoin(event.category, category).
-                leftJoin(request).on(request.event.id.eq(event.id)
+                .leftJoin(event.category, category)
+                .leftJoin(request).on(request.event.id.eq(event.id)
                         .and(request.status.eq(RequestStatus.CONFIRMED)))
                 .groupBy(event.id, user.id, category.id, location.locationId.lat, location.locationId.lon);
     }

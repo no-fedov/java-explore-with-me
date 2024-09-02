@@ -145,15 +145,9 @@ public class RequestServiceImp implements RequestService {
         requestRepository.saveAll(requests);
 
         return EventRequestStatusUpdateResult.builder()
-                        .
-
-                confirmedRequests(RequestMapper.convertToRequestDtoList(confirmedRequests))
-                        .
-
-                rejectedRequests(RequestMapper.convertToRequestDtoList(rejectedRequests))
-                        .
-
-                build();
+                .confirmedRequests(RequestMapper.convertToRequestDtoList(confirmedRequests))
+                .rejectedRequests(RequestMapper.convertToRequestDtoList(rejectedRequests))
+                .build();
     }
 
     private void validRequest(User currentUser, Event currentEvent) {

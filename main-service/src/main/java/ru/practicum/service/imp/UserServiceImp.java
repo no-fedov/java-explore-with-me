@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.mapper.UserMapper;
 import ru.practicum.dto.user.NewUserRequest;
 import ru.practicum.dto.user.UserDto;
-import ru.practicum.exception.CategoryActionException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.UserActionException;
 import ru.practicum.model.User;

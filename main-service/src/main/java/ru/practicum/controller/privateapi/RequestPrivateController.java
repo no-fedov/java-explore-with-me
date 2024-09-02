@@ -1,4 +1,4 @@
-package ru.practicum.controller.private_api;
+package ru.practicum.controller.privateapi;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,10 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.RequestDto;
 import ru.practicum.service.RequestService;
 
-import java.time.LocalDateTime;
 import java.util.List;
-
-import static ru.practicum.model.status.RequestStatus.PENDING;
 
 @RestController
 @RequestMapping("/users")

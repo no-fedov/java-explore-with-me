@@ -20,10 +20,10 @@ import java.util.Map;
 @Component
 @AllArgsConstructor
 public class StatAdapter {
-    private final static String APP_NAME = "ewm-main-service";
-    private final static String EVENT_URI_TEMPLATE = "/events/";
-    private final static LocalDateTime TIME_FROM = LocalDateTime.of(1000,1,1,1,1);
-    private final static Boolean UNIQUE_VIEWS = Boolean.TRUE;
+    private static final String APP_NAME = "ewm-main-service";
+    private static final String EVENT_URI_TEMPLATE = "/events/";
+    private static final LocalDateTime TIME_FROM = LocalDateTime.of(1000, 1, 1, 1, 1);
+    private static final Boolean UNIQUE_VIEWS = Boolean.TRUE;
 
     private final StatClient statClient;
     private ObjectMapper mapper;

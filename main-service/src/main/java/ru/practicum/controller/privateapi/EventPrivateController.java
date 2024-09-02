@@ -1,7 +1,6 @@
-package ru.practicum.controller.private_api;
+package ru.practicum.controller.privateapi;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;

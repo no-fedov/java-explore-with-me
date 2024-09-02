@@ -7,7 +7,6 @@ import ru.practicum.model.Event;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
