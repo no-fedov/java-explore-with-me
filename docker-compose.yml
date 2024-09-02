@@ -43,6 +43,7 @@ services:
       - DB_PORT=5432
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
+      - STATS_SERVER_URL=http://stats-server:9090
 
   ewm-db:
     container_name: ewm-db
