@@ -60,7 +60,6 @@ public class EventPrivateServiceImp implements EventService {
             categoryService.findCategory(eventUpdateDto.getCategory());
         }
 
-        //обновить категории забыл я
         if (!event.getInitiator().getId().equals(eventUpdateDto.getInitiator())) {
             throw new NotFoundException("Event with id=" + eventUpdateDto.getId() + "was not found");
         }

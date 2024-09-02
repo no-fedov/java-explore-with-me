@@ -21,7 +21,9 @@ import java.util.Map;
 @AllArgsConstructor
 public class StatAdapter {
     private final static String APP_NAME = "ewm-main-service";
+    private final static String EVENT_URI_TEMPLATE = "/events/";
     private final static LocalDateTime TIME_FROM = LocalDateTime.of(1000,1,1,1,1);
+    private final static Boolean UNIQUE_VIEWS = Boolean.TRUE;
 
     private final StatClient statClient;
     private ObjectMapper mapper;
@@ -36,8 +38,8 @@ public class StatAdapter {
     }
 
     public void setStatsForEvent(List<EventFullDto> events) {
-        List<String> uris = events.stream().map(event -> "event/" + event.getId()).toList();
-        Map<Long, ViewStats> stats = getStats(new URLParameter(TIME_FROM, LocalDateTime.now(), uris, false));
+        List<String> uris = events.stream().map(event -> EVENT_URI_TEMPLATE + event.getId()).toList();
+        Map<Long, ViewStats> stats = getStats(new URLParameter(TIME_FROM, LocalDateTime.now(), uris, UNIQUE_VIEWS));
         EventStatConverter.convertToEventWithStatistic(events, stats);
     }
 
