@@ -106,7 +106,7 @@ public class RequestServiceImp implements RequestService {
         }
 
         if (eventRequestStatusUpdateRequest.getStatus() == EventRequestStatus.REJECTED
-                && requestRepository.containConfirmedRequestInList(queryFactory, eventRequestStatusUpdateRequest.getRequestIds()) > 0) {
+                && requestRepository.containConfirmedListRequestOfEvent(queryFactory, eventRequestStatusUpdateRequest.getRequestIds(), eventId) > 0) {
             throw new RequestActionException("Попытка отменить уже принятую заявку на участие в событии");
         }
 
@@ -128,7 +128,8 @@ public class RequestServiceImp implements RequestService {
         Long participantLimit = event.getParticipantLimit();
         Long confirmedParticipants = requestRepository.countParticipants(queryFactory, eventId);
 
-        for (Request req : requests) {
+        for (
+                Request req : requests) {
             if (confirmedParticipants >= participantLimit && participantLimit > 0) {
                 break;
             }
@@ -144,9 +145,15 @@ public class RequestServiceImp implements RequestService {
         requestRepository.saveAll(requests);
 
         return EventRequestStatusUpdateResult.builder()
-                .confirmedRequests(RequestMapper.convertToRequestDtoList(confirmedRequests))
-                .rejectedRequests(RequestMapper.convertToRequestDtoList(rejectedRequests))
-                .build();
+                        .
+
+                confirmedRequests(RequestMapper.convertToRequestDtoList(confirmedRequests))
+                        .
+
+                rejectedRequests(RequestMapper.convertToRequestDtoList(rejectedRequests))
+                        .
+
+                build();
     }
 
     private void validRequest(User currentUser, Event currentEvent) {

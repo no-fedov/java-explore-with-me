@@ -24,12 +24,13 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
                 .fetchOne();
     }
 
-    default Long containConfirmedRequestInList(JPAQueryFactory queryFactory, List<Long> eventId) {
+    default Long containConfirmedListRequestOfEvent(JPAQueryFactory queryFactory, List<Long> requestIds, Long eventId) {
         QRequest request = QRequest.request;
         return queryFactory.select(request.count())
                 .from(request)
-                .where(request.event.id.in(eventId))
+                .where(request.event.id.eq(eventId))
                 .where(request.status.eq(RequestStatus.CONFIRMED))
+                .where(request.id.in(requestIds))
                 .fetchOne();
     }
 }

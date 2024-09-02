@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.LocationDto;
 import ru.practicum.dto.event.EventFullDto;
-import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.URLParameterEventPublic;
 import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.exception.NotFoundException;
@@ -26,7 +25,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class EventPublicServiceImp implements EventPublicService {
-    //    private final EventService eventService;
     private final EventRepository eventRepository;
     private final JPAQueryFactory queryFactory;
     private final QEvent event = QEvent.event;
@@ -35,31 +33,8 @@ public class EventPublicServiceImp implements EventPublicService {
     private final QUser user = QUser.user;
     private final QCategory category = QCategory.category;
 
-    public List<EventShortDto> findEvents(URLParameterEventPublic parameters) {
-        JPAQuery<EventShortDto> query = queryFactory.select(Projections.constructor(EventShortDto.class,
-                        event.id,
-                        Projections.constructor(UserShortDto.class,
-                                user.id,
-                                user.name),
-                        Projections.constructor(CategoryDto.class,
-                                category.id,
-                                category.name),
-                        Projections.constructor(LocationDto.class,
-                                location.locationId.lat,
-                                location.locationId.lon),
-                        event.title,
-                        event.annotation,
-                        event.description,
-                        event.participantLimit,
-                        event.time,
-                        event.paid,
-                        event.requestModeration,
-                        event.state,
-                        event.createdOn))
-                .from(event)
-                .leftJoin(event.location, location)
-                .leftJoin(event.initiator, user)
-                .leftJoin(event.category, category);
+    public List<EventFullDto> findEvents(URLParameterEventPublic parameters) {
+        JPAQuery<EventFullDto> query = getQueryTemplateForFullEventDto();
 
         if (parameters.getCategories() != null && !parameters.getCategories().isEmpty()) {
             query.where(event.category.id.in(parameters.getCategories()));
@@ -106,7 +81,15 @@ public class EventPublicServiceImp implements EventPublicService {
         if (currentEvent.isEmpty() || currentEvent.get().getState() != StateEvent.PUBLISHED) {
             throw new NotFoundException("Не найден такой event ли он еще не опубликован");
         }
-        JPAQuery<EventFullDto> eventsQuery = queryFactory.select(Projections.constructor(EventFullDto.class,
+
+        JPAQuery<EventFullDto> eventsQuery = getQueryTemplateForFullEventDto()
+                .where(event.id.eq(id));
+
+        return eventsQuery.fetchOne();
+    }
+
+    private JPAQuery<EventFullDto> getQueryTemplateForFullEventDto() {
+        return queryFactory.select(Projections.constructor(EventFullDto.class,
                                 event.id,
                                 Projections.constructor(UserShortDto.class,
                                         user.id,
@@ -121,24 +104,22 @@ public class EventPublicServiceImp implements EventPublicService {
                                 event.annotation,
                                 event.description,
                                 event.participantLimit,
-                                request.count(), // количество подтвержденных запросов
+                                request.count(),
                                 event.paid,
                                 event.requestModeration,
                                 event.state,
                                 event.createdOn,
                                 event.time,
                                 event.publishedOn,
-                                Expressions.constant(0L) // искуственно устанавливаю количество просмотров
+                                Expressions.constant(0L)
                         )
                 )
                 .from(event)
-                .leftJoin(event.initiator, user)
-                .leftJoin(event.category, category)
                 .leftJoin(event.location, location)
-                .leftJoin(request).on(request.event.id.eq(event.id)
+                .leftJoin(event.initiator, user)
+                .leftJoin(event.category, category).
+                leftJoin(request).on(request.event.id.eq(event.id)
                         .and(request.status.eq(RequestStatus.CONFIRMED)))
-                .where(event.id.eq(id))
                 .groupBy(event.id, user.id, category.id, location.locationId.lat, location.locationId.lon);
-        return eventsQuery.fetchOne();
     }
 }

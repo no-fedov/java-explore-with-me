@@ -4,6 +4,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
@@ -43,6 +44,7 @@ public class EventAdminServiceImp implements EventAdminService {
     private final QCategory category = QCategory.category;
     private final QRequest request = QRequest.request;
 
+    @Transactional
     @Override
     public List<EventFullDto> getEvents(URLParameterEventAdmin parameters) {
         JPAQuery<EventFullDto> eventsQuery = queryFactory.select(Projections.constructor(EventFullDto.class,
@@ -103,6 +105,7 @@ public class EventAdminServiceImp implements EventAdminService {
         return events;
     }
 
+    @Transactional
     @Override
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminRequest eventDto) {
         Event event = eventRepository.findById(eventId)
