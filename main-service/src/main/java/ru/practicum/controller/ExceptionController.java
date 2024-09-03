@@ -38,14 +38,14 @@ public class ExceptionController {
         List<String> descriptionViolations = e.getFieldErrors().stream()
                 .map(x -> x.getField() + " -> " + x.getDefaultMessage())
                 .collect(Collectors.toList());
-        log.warn("Тело запроса содержит невалидные данные: {}.", descriptionViolations);
+        log.debug("Тело запроса содержит невалидные данные: {}.", descriptionViolations);
         return Map.of("Тело запроса содержит некорректные данные", descriptionViolations);
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFoundEntity(RuntimeException e) {
-        log.info("NOT FOUND EXCEPTION {}", e.getMessage());
+        log.debug("NOT FOUND EXCEPTION {}", e.getMessage());
         return Map.of("Ошибка: ", e.getMessage());
     }
 
@@ -72,6 +72,6 @@ public class ExceptionController {
     }
 
     private void writeLog(Throwable e) {
-        log.info("Exception: {}", Arrays.toString(e.getStackTrace()));
+        log.debug("Exception: {}", Arrays.toString(e.getStackTrace()));
     }
 }
