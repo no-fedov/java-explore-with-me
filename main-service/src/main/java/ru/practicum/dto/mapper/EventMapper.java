@@ -93,9 +93,7 @@ public class EventMapper {
         if (eventUpdateDto.getPaid() != null) {
             event.setPaid(eventUpdateDto.getPaid());
         }
-//        if (eventUpdateDto.getCreatedOn() != null) {
-//            event.setCreatedOn(eventUpdateDto.getCreatedOn());
-//        }
+
         return event;
     }
 
@@ -108,10 +106,7 @@ public class EventMapper {
         if (eventDto.getAnnotation() != null && !eventDto.getAnnotation().isBlank()) {
             event.setAnnotation(eventDto.getAnnotation());
         }
-//        if (eventDto.getCategory() != null) {
-//            event.setCategory();
-//        }
-//        if (локация)
+
         if (eventDto.getDescription() != null && !eventDto.getDescription().isBlank()) {
             event.setDescription(eventDto.getDescription());
         }
