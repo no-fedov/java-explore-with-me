@@ -15,6 +15,4 @@ public interface EventService {
     List<EventShortDto> getEvents(Long userId, Pageable page);
 
     EventShortDto getEvent(Long userId, Long eventId);
-
-    EventShortDto findEvent(Long eventId);
  }

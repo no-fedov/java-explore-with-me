@@ -98,11 +98,6 @@ public class EventPrivateServiceImp implements EventService {
         return eventDtoFromEvent(currentEvent);
     }
 
-    @Override
-    public EventShortDto findEvent(Long eventId) {
-        return eventDtoFromEvent(findEventById(eventId));
-    }
-
     private Event findEventById(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + id + "was not found"));
