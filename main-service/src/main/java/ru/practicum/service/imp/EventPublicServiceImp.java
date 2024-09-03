@@ -40,7 +40,7 @@ public class EventPublicServiceImp implements EventPublicService {
             query.where(event.category.id.in(parameters.getCategories()));
         }
 
-        if (parameters.getText() != null && !parameters.getText().trim().isEmpty()) {
+        if (parameters.getText() != null && !parameters.getText().isBlank()) {
             String searchText = "%" + parameters.getText().trim() + "%";
             BooleanBuilder conditionForSearch = new BooleanBuilder();
             conditionForSearch.or(event.description.likeIgnoreCase(searchText))
