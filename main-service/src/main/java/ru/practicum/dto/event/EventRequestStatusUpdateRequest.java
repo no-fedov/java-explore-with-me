@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder(toBuilder = true)
@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class EventRequestStatusUpdateRequest {
     @NotEmpty
-    List<Long> requestIds;
+    private Set<Long> requestIds;
     @NotNull
-    EventRequestStatus status;
+    private EventRequestStatus status;
 }
