@@ -7,6 +7,7 @@ import ru.practicum.model.Request;
 import ru.practicum.model.status.RequestStatus;
 
 import java.util.List;
+import java.util.Set;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findByIdAndRequester_Id(Long requestId, Long requester);
@@ -24,7 +25,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
                 .fetchOne();
     }
 
-    default Long containConfirmedListRequestOfEvent(JPAQueryFactory queryFactory, List<Long> requestIds, Long eventId) {
+    default Long containConfirmedListRequestOfEvent(JPAQueryFactory queryFactory, Set<Long> requestIds, Long eventId) {
         QRequest request = QRequest.request;
         return queryFactory.select(request.count())
                 .from(request)
