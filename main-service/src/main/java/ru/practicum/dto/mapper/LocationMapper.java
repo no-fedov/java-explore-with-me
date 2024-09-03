@@ -18,7 +18,6 @@ public class LocationMapper {
 
     }
 
-
     public static LocationDto locationDtoFromLocation(Location location) {
         LocationId locationId = location.getLocationId();
         return LocationDto.builder()
