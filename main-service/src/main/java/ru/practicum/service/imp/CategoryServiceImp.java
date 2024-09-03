@@ -71,9 +71,9 @@ public class CategoryServiceImp implements CategoryService {
 
     private void checkNameDuplication(String name) {
         Optional<Category> categoryByName = categoryRepository.findByName(name);
-        if (categoryByName.isPresent()) {
+        categoryByName.ifPresent(value -> {
             throw new CategoryActionException("Дублирование имени категории");
-        }
+        });
     }
 
     private void checkPresentEventWithCurrentCategory(Long categoryId) {
