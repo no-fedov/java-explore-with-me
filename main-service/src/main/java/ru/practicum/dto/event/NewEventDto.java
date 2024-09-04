@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class NewEventDto {
     @PositiveOrZero
+    @NotNull
     private Long category;
 
     @NotBlank
