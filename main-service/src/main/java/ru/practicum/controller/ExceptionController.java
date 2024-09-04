@@ -21,15 +21,15 @@ import java.util.stream.Collectors;
 public class ExceptionController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String,String> handleServerException(Exception e) {
-        writeLog(e);
+    public Map<String, String> handleServerException(Exception e) {
+        log.debug("Получен статус 500 SERVER_ERROR {}", e.getMessage());
         return Map.of("Ошибка: ", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleMissingURLParameter(MissingServletRequestParameterException e) {
-        writeLog(e);
+        log.debug("Получен статус 400 BAD_REQUEST {}", e.getMessage());
         return Map.of("Ошибка: ", e.getMessage());
     }
 
@@ -39,41 +39,34 @@ public class ExceptionController {
         List<String> descriptionViolations = e.getFieldErrors().stream()
                 .map(x -> x.getField() + " -> " + x.getDefaultMessage())
                 .collect(Collectors.toList());
-        log.debug("Тело запроса содержит невалидные данные: {}.", descriptionViolations);
+        log.debug("Получен статус 400 BAD_REQUEST. Тело запроса содержит невалидные данные: {}.", descriptionViolations);
         return Map.of("Тело запроса содержит некорректные данные", descriptionViolations);
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFoundEntity(RuntimeException e) {
-        log.debug("NOT FOUND EXCEPTION {}", e.getMessage());
-        return Map.of("Ошибка: ", e.getMessage());
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleIllegalArgumentException(IllegalArgumentException e) {
-        writeLog(e);
+        log.debug("Получен статус 404 NOT_FOUND {}", e.getMessage());
         return Map.of("Ошибка: ", e.getMessage());
     }
 
     @ExceptionHandler(NoValidParameter.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleNoValidParameter(RuntimeException e) {
-        writeLog(e);
+        log.debug("Получен статус 400 BAD_REQUEST {}", e.getMessage());
         return Map.of("Ошибка: ", e.getMessage());
     }
 
     @ExceptionHandler({EventActionException.class, RequestActionException.class,
-            CategoryActionException.class, UserActionException.class})
+            CategoryActionException.class, UserActionException.class, IllegalArgumentException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleClientException(RuntimeException e) {
-        writeLog(e);
+        log.debug("Получен статус 409 CLIENT_ERROR {}", e.getMessage());
         return Map.of("Ошибка: ", e.getMessage());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public Map<String,String> handleNoValidParameter(ConstraintViolationException e) {
+    public Map<String, String> handleNoValidParameter(ConstraintViolationException e) {
         writeLog(e);
         return Map.of("Ошибка: ", e.getMessage());
     }
