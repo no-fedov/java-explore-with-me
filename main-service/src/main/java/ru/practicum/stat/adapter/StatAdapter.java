@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import ru.practicum.client.StatClient;
@@ -20,7 +21,8 @@ import java.util.Map;
 @Component
 @AllArgsConstructor
 public class StatAdapter {
-    private static final String APP_NAME = "ewm-main-service";
+    @Value("application.name")
+    private static String APP_NAME;
     private static final String EVENT_URI_TEMPLATE = "/events/";
     private static final LocalDateTime TIME_FROM = LocalDateTime.of(1000, 1, 1, 1, 1);
     private static final Boolean UNIQUE_VIEWS = Boolean.TRUE;
@@ -30,7 +32,7 @@ public class StatAdapter {
 
     public void sendStats(HttpServletRequest request) {
         statClient.post(EndpointHit.builder()
-                .app("ewm-main-service")
+                .app(APP_NAME)
                 .ip(request.getRemoteAddr())
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
