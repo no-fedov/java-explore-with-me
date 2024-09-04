@@ -38,14 +38,16 @@ public class EventMapper {
         Location currentLocation = locationDto != null
                 ? locationFromLocationDto(locationDto)
                 : null;
+
+
         return Event.builder()
                 .initiator(currentUser)
                 .category(currentCategory)
                 .title(eventDto.getTitle())
                 .annotation(eventDto.getAnnotation())
                 .description(eventDto.getDescription())
-                .paid(eventDto.getPaid())
-                .requestModeration(eventDto.getRequestModeration())
+                .paid(eventDto.isPaid())
+                .requestModeration(eventDto.isRequestModeration())
                 .participantLimit(eventDto.getParticipantLimit())
                 .location(currentLocation)
                 .createdOn(LocalDateTime.now())
@@ -61,7 +63,7 @@ public class EventMapper {
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
                 .description(event.getDescription())
-                .paid(event.getPaid())
+                .paid(event.isPaid())
                 .requestModeration(event.getRequestModeration())
                 .participantLimit(event.getParticipantLimit())
                 .state(event.getState())
@@ -140,7 +142,7 @@ public class EventMapper {
                 .title(event.getTitle())
                 .annotation(event.getAnnotation())
                 .description(event.getDescription())
-                .paid(event.getPaid())
+                .paid(event.isPaid())
                 .requestModeration(event.getRequestModeration())
                 .participantLimit(event.getParticipantLimit())
                 .state(event.getState())

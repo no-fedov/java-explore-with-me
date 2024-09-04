@@ -1,6 +1,7 @@
 package ru.practicum.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -34,19 +35,20 @@ public class NewEventDto {
     @Size(min = 20, max = 7000)
     private String description;
 
-    @Builder.Default
     @PositiveOrZero
-    private Long participantLimit = 0L;
-
+    private long participantLimit;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @NotNull
     private LocalDateTime eventDate;
 
+    @Valid
+    @NotNull
     private LocationDto location;
+
+
+    private boolean paid;
     @Builder.Default
-    private Boolean paid = false;
-    @Builder.Default
-    private Boolean requestModeration = true;
+    private boolean requestModeration = true;
 
     public void checkValid() {
         if (eventDate != null && eventDate.isBefore(LocalDateTime.now().minusHours(2))) {

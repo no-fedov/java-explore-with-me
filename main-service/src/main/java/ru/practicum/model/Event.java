@@ -34,7 +34,7 @@ public class Event {
     private String annotation;
     @Column(length = 7000)
     private String description;
-    private Boolean paid;
+    private boolean paid;
     private Boolean requestModeration;
     private Long participantLimit;
     private LocalDateTime time;
