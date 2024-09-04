@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.event.EventFullDto;
-import ru.practicum.dto.event.StateActionAdmin;
 import ru.practicum.dto.event.URLParameterEventAdmin;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.mapper.EventMapper;
@@ -50,18 +49,18 @@ public class EventAdminServiceImp implements EventAdminService {
             throw new NoValidParameter("Дата начала изменяемого события должна быть не ранее чем за час от даты публикации");
         }
 
-        if (eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT
+        if (eventDto.getStateAction() == UpdateEventAdminRequest.StateActionAdmin.PUBLISH_EVENT
                 && event.getState() != StateEvent.PENDING) {
             throw new EventActionException("Событие можно публиковать, только если оно в состоянии ожидания публикации");
         }
 
-        if (eventDto.getStateAction() == StateActionAdmin.REJECT_EVENT
+        if (eventDto.getStateAction() == UpdateEventAdminRequest.StateActionAdmin.REJECT_EVENT
                 && event.getState() == StateEvent.PUBLISHED) {
             throw new EventActionException("Событие можно отклонить, только если оно еще не опубликовано");
         }
 
         if (eventDto.getStateAction() != null) {
-            if (eventDto.getStateAction() == StateActionAdmin.PUBLISH_EVENT) {
+            if (eventDto.getStateAction() == UpdateEventAdminRequest.StateActionAdmin.PUBLISH_EVENT) {
                 event.setState(StateEvent.PUBLISHED);
                 event.setPublishedOn(LocalDateTime.now());
             } else {

@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 @RestControllerAdvice("ru.practicum")
 @Slf4j
 public class ExceptionController {
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String,String> handleServerException(Exception e) {
-        writeLog(e);
-        return Map.of("Ошибка: ", e.getMessage());
-    }
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    public Map<String,String> handleServerException(Exception e) {
+//        writeLog(e);
+//        return Map.of("Ошибка: ", e.getMessage());
+//    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)

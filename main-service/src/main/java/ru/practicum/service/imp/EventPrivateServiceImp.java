@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
-import ru.practicum.dto.event.StateActionUser;
 import ru.practicum.dto.event.UpdateEventUserRequest;
 import ru.practicum.dto.mapper.EventMapper;
 import ru.practicum.dto.user.UserDto;
@@ -74,7 +73,7 @@ public class EventPrivateServiceImp implements EventService {
         }
 
         if (eventUpdateDto.getStateAction() != null) {
-            event.setState(eventUpdateDto.getStateAction() == StateActionUser.CANCEL_REVIEW
+            event.setState(eventUpdateDto.getStateAction() == UpdateEventUserRequest.StateActionUser.CANCEL_REVIEW
                     ? StateEvent.CANCELED
                     : StateEvent.PENDING);
         }
