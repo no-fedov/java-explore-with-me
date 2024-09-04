@@ -77,4 +77,3 @@ CREATE TABLE IF NOT EXISTS compilations_events (
     event_id BIGINT REFERENCES events(id),
     PRIMARY KEY (compilation_id, event_id)
 );
-

@@ -3,6 +3,7 @@ package ru.practicum.stat.adapter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +15,15 @@ import ru.practicum.dto.ViewStats;
 import ru.practicum.dto.event.EventFullDto;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class StatAdapter {
     private static final String EVENT_URI_TEMPLATE = "/events/";
-    private static final LocalDateTime TIME_FROM = LocalDateTime.of(1000, 1, 1, 1, 1);
     private static final Boolean UNIQUE_VIEWS = Boolean.TRUE;
 
     private final String appName;
@@ -36,23 +38,27 @@ public class StatAdapter {
     }
 
     public void sendStats(HttpServletRequest request) {
-        statClient.post(EndpointHit.builder()
+        EndpointHit endpointHit = EndpointHit.builder()
                 .app(appName)
                 .ip(request.getRemoteHost())
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
-                .build());
-
-        System.out.println("ИМЯ ПРИЛОЖЕНИЯ: " + appName);
-        System.out.println("IP : " + request.getRemoteHost());
-        System.out.println("URI: " + request.getRequestURI());
-        System.out.println(request);
+                .build();
+        statClient.post(endpointHit);
+        log.info("Отправлена статистика: {}", endpointHit);
     }
 
     public void setStatsForEvent(List<EventFullDto> events) {
-        List<String> uris = events.stream().map(event -> EVENT_URI_TEMPLATE + event.getId()).toList();
-        Map<Long, ViewStats> stats = getStats(new URLParameter(TIME_FROM, LocalDateTime.now(), uris, UNIQUE_VIEWS));
-        EventStatConverter.convertToEventWithStatistic(events, stats);
+        try {
+            LocalDateTime time = events.stream().sorted(Comparator.comparing(EventFullDto::getPublishedOn))
+                    .map(EventFullDto::getPublishedOn)
+                    .findFirst().orElseThrow(() -> new RuntimeException("Нет запросов на участие"));
+            List<String> uris = events.stream().map(event -> EVENT_URI_TEMPLATE + event.getId()).toList();
+            Map<Long, ViewStats> stats = getStats(new URLParameter(time, LocalDateTime.now(), uris, UNIQUE_VIEWS));
+            EventStatConverter.convertToEventWithStatistic(events, stats);
+        } catch (RuntimeException e) {
+            log.info("Нет запросов на участие в events");
+        }
     }
 
     private Map<Long, ViewStats> getStats(URLParameter parameter) {
