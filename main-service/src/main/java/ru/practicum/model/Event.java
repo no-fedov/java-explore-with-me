@@ -12,10 +12,11 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "events")
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "event_seq")
-    @SequenceGenerator(name = "event_seq", sequenceName = "event_sequence", initialValue = 0, allocationSize = 1)
+    @SequenceGenerator(name = "event_seq", initialValue = 0, allocationSize = 1)
     private Long id;
 
     @ToString.Exclude
@@ -49,6 +50,5 @@ public class Event {
     })
     private Location location;
     private LocalDateTime createdOn;
-    @Column(nullable = true)
     private LocalDateTime publishedOn;
 }
