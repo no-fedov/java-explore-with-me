@@ -14,6 +14,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocationId implements Serializable {
-    private String lat;
-    private String lon;
+    private Double lat;
+    private Double lon;
 }
