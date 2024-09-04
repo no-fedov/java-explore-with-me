@@ -139,8 +139,7 @@ public class EventAdminServiceImp implements EventAdminService {
         eventRepository.save(event);
         EventFullDto eventFullDto = EventMapper.convertToEventFullDtoFromEvent(event);
 
-
-        Long confirmedRequestCounter = requestRepository.countParticipants(queryFactory, eventId);
+        Long confirmedRequestCounter = requestRepository.getCountParticipants(eventId);
         eventFullDto.setConfirmedRequests(confirmedRequestCounter);
         statAdapter.setStatsForEvent(List.of(eventFullDto));
         return eventFullDto;

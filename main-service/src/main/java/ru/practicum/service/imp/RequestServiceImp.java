@@ -1,7 +1,5 @@
 package ru.practicum.service.imp;
 
-import com.querydsl.jpa.impl.JPAQuery;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +13,6 @@ import ru.practicum.exception.EventActionException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.RequestActionException;
 import ru.practicum.model.Event;
-import ru.practicum.model.QRequest;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
 import ru.practicum.model.status.RequestStatus;
@@ -30,7 +27,6 @@ import java.util.List;
 import static ru.practicum.dto.mapper.RequestMapper.convertToRequestDto;
 import static ru.practicum.dto.mapper.RequestMapper.convertToRequestFromEventAndUser;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -38,8 +34,6 @@ public class RequestServiceImp implements RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
-    private final JPAQueryFactory queryFactory;
-    private final QRequest request = QRequest.request;
 
     @Transactional
     @Override
@@ -81,13 +75,8 @@ public class RequestServiceImp implements RequestService {
     @Transactional
     @Override
     public List<RequestDto> getRequestByEvent(Long userId, Long eventId) {
-        JPAQuery<Request> query = queryFactory
-                .select(request)
-                .from(request)
-                .where(request.event.id.eq(eventId))
-                .where(request.event.initiator.id.eq(userId));
-        List<Request> request = query.fetch();
-        return RequestMapper.convertToRequestDtoList(request);
+        List<Request> requests = requestRepository.getRequestByEvent(userId, eventId);
+        return RequestMapper.convertToRequestDtoList(requests);
     }
 
     @Transactional
@@ -100,20 +89,17 @@ public class RequestServiceImp implements RequestService {
 
         if (event.getParticipantLimit() != 0
                 && eventRequestStatusUpdateRequest.getStatus() == EventRequestStatus.CONFIRMED
-                && requestRepository.countParticipants(queryFactory, eventId) >= event.getParticipantLimit()) {
+                && requestRepository.getCountParticipants(eventId) >= event.getParticipantLimit()) {
             throw new RequestActionException("нельзя подтвердить заявку, " +
                     "если уже достигнут лимит по заявкам на данное событие");
         }
 
         if (eventRequestStatusUpdateRequest.getStatus() == EventRequestStatus.REJECTED
-                && requestRepository.containConfirmedListRequestOfEvent(queryFactory, eventRequestStatusUpdateRequest.getRequestIds(), eventId) > 0) {
+                && requestRepository.getConfirmedCountListRequestOfEvent(eventRequestStatusUpdateRequest.getRequestIds(), eventId) > 0) {
             throw new RequestActionException("Попытка отменить уже принятую заявку на участие в событии");
         }
 
-        List<Request> requests = queryFactory.select(request).from(request)
-                .where(request.event.id.eq(eventId))
-                .where(request.id.in(eventRequestStatusUpdateRequest.getRequestIds()))
-                .where(request.status.eq(RequestStatus.PENDING)).fetch();
+        List<Request> requests = requestRepository.getPendingRequestsForEvent(eventRequestStatusUpdateRequest.getRequestIds(), eventId);
 
         if (eventRequestStatusUpdateRequest.getStatus() == EventRequestStatus.REJECTED) {
             requests.forEach(r -> r.setStatus(RequestStatus.REJECTED));
@@ -126,10 +112,9 @@ public class RequestServiceImp implements RequestService {
 
         int confirmedCount = 0;
         Long participantLimit = event.getParticipantLimit();
-        Long confirmedParticipants = requestRepository.countParticipants(queryFactory, eventId);
+        Long confirmedParticipants = requestRepository.getCountParticipants(eventId);
 
-        for (
-                Request req : requests) {
+        for (Request req : requests) {
             if (confirmedParticipants >= participantLimit && participantLimit > 0) {
                 break;
             }
@@ -168,7 +153,7 @@ public class RequestServiceImp implements RequestService {
         }
 
         Long participants = requestRepository
-                .countParticipants(queryFactory, currentEvent.getId());
+                .getCountParticipants(currentEvent.getId());
 
         if (participants >= currentEvent.getParticipantLimit() && currentEvent.getParticipantLimit() != 0) {
             throw new RequestActionException("Достигнут лимит участников");
