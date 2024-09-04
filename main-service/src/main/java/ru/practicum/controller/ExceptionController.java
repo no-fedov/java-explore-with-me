@@ -1,6 +1,7 @@
 package ru.practicum.controller;
 
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -67,6 +68,12 @@ public class ExceptionController {
             CategoryActionException.class, UserActionException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleClientException(RuntimeException e) {
+        writeLog(e);
+        return Map.of("Ошибка: ", e.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Map<String,String> handleNoValidParameter(ConstraintViolationException e) {
         writeLog(e);
         return Map.of("Ошибка: ", e.getMessage());
     }

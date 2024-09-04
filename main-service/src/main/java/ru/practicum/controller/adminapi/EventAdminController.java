@@ -1,8 +1,11 @@
 package ru.practicum.controller.adminapi;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.controller.PageConstructor;
 import ru.practicum.dto.event.EventFullDto;
@@ -20,6 +23,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/admin/events")
+@Validated
 @Slf4j
 public class EventAdminController {
     private static final DateTimeFormatter timeFormat = DateTimeFormatter
@@ -28,13 +32,13 @@ public class EventAdminController {
     private final EventAdminService eventAdminService;
 
     @GetMapping
-    public List<EventFullDto> getEvents(@RequestParam(required = false) List<Long> users,
+    public List<EventFullDto> getEvents(@RequestParam(defaultValue = "") List<Long> users,
                                         @RequestParam(required = false) List<String> states,
                                         @RequestParam(required = false) List<Long> categories,
                                         @RequestParam(required = false) String rangeStart,
                                         @RequestParam(required = false) String rangeEnd,
-                                        @RequestParam(defaultValue = "0") Integer from,
-                                        @RequestParam(defaultValue = "10") Integer size) {
+                                        @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                        @Positive @RequestParam(defaultValue = "10") Integer size) {
         LocalDateTime startTime = null;
         if (rangeStart != null) {
             startTime = LocalDateTime.parse(rangeStart, timeFormat);
