@@ -3,7 +3,7 @@ package ru.practicum.stat.adapter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -19,24 +19,34 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@AllArgsConstructor
 public class StatAdapter {
-    @Value("application.name")
-    private static String APP_NAME;
     private static final String EVENT_URI_TEMPLATE = "/events/";
     private static final LocalDateTime TIME_FROM = LocalDateTime.of(1000, 1, 1, 1, 1);
     private static final Boolean UNIQUE_VIEWS = Boolean.TRUE;
 
+    private final String appName;
     private final StatClient statClient;
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
+
+    @Autowired
+    public StatAdapter(@Value("${app.name}") String appName, StatClient statClient, ObjectMapper mapper) {
+        this.appName = appName;
+        this.statClient = statClient;
+        this.mapper = mapper;
+    }
 
     public void sendStats(HttpServletRequest request) {
         statClient.post(EndpointHit.builder()
-                .app(APP_NAME)
-                .ip(request.getRemoteAddr())
+                .app(appName)
+                .ip(request.getRemoteHost())
                 .uri(request.getRequestURI())
                 .timestamp(LocalDateTime.now())
                 .build());
+
+        System.out.println("ИМЯ ПРИЛОЖЕНИЯ: " + appName);
+        System.out.println("IP : " + request.getRemoteHost());
+        System.out.println("URI: " + request.getRequestURI());
+        System.out.println(request);
     }
 
     public void setStatsForEvent(List<EventFullDto> events) {

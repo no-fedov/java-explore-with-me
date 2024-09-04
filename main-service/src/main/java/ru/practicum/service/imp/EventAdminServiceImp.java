@@ -32,9 +32,7 @@ public class EventAdminServiceImp implements EventAdminService {
     @Transactional
     @Override
     public List<EventFullDto> getEvents(URLParameterEventAdmin parameters) {
-        List<EventFullDto> events = eventRepository.getEvents(parameters);
-        statAdapter.setStatsForEvent(events);
-        return events;
+        return eventRepository.getEventsForAdmin(parameters);
     }
 
     @Transactional
@@ -73,7 +71,6 @@ public class EventAdminServiceImp implements EventAdminService {
 
         Long confirmedRequestCounter = requestRepository.getCountParticipants(eventId);
         eventFullDto.setConfirmedRequests(confirmedRequestCounter);
-        statAdapter.setStatsForEvent(List.of(eventFullDto));
         return eventFullDto;
     }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.repository.custom.imp;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -10,6 +11,7 @@ import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.LocationDto;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.URLParameterEventAdmin;
+import ru.practicum.dto.event.URLParameterEventPublic;
 import ru.practicum.dto.user.UserShortDto;
 import ru.practicum.model.status.RequestStatus;
 import ru.practicum.model.status.StateEvent;
@@ -29,7 +31,7 @@ public class EventFullPresentRepositoryImpl implements EventFullPresentRepositor
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<EventFullDto> getEvents(URLParameterEventAdmin parameters) {
+    public List<EventFullDto> getEventsForAdmin(URLParameterEventAdmin parameters) {
         JPAQuery<EventFullDto> eventsQuery = getEventsQueryTemplate();
 
         if (!parameters.getStates().isEmpty()) {
@@ -62,8 +64,56 @@ public class EventFullPresentRepositoryImpl implements EventFullPresentRepositor
         return eventsQuery.fetch();
     }
 
+    @Override
+    public List<EventFullDto> getEventsForPublic(URLParameterEventPublic parameters) {
+        JPAQuery<EventFullDto> query = getEventsQueryTemplate();
+
+        if (parameters.getCategories() != null && !parameters.getCategories().isEmpty()) {
+            query.where(event.category.id.in(parameters.getCategories()));
+        }
+
+        if (parameters.getText() != null && !parameters.getText().isBlank()) {
+            String searchText = "%" + parameters.getText().trim() + "%";
+            BooleanBuilder conditionForSearch = new BooleanBuilder();
+            conditionForSearch.or(event.description.likeIgnoreCase(searchText))
+                    .or(event.title.likeIgnoreCase(searchText))
+                    .or(event.annotation.likeIgnoreCase(searchText));
+            query.where(conditionForSearch);
+        }
+
+        if (parameters.getPaid() != null) {
+            query.where(event.paid.eq(parameters.getPaid()));
+        }
+
+        if (parameters.getRangeStart() != null) {
+            query.where(event.time.goe(parameters.getRangeStart()));
+        }
+
+        if (parameters.getRangeEnd() != null) {
+            query.where(event.time.loe(parameters.getRangeEnd()));
+        }
+
+        if (parameters.getOnlyAvailable()) {
+            JPAQuery<Long> confirmedRequestCountSubquery = queryFactory
+                    .select(request.count())
+                    .from(request)
+                    .where(request.event.id.eq(event.id)
+                            .and(request.status.eq(RequestStatus.CONFIRMED)));
+
+            query.where(confirmedRequestCountSubquery.lt(event.participantLimit));
+        }
+        query.offset(parameters.getPage().getOffset())
+                .limit(parameters.getPage().getPageSize());
+        return query.fetch();
+    }
+
+    @Override
+    public EventFullDto getEvent(Long eventId) {
+        return getEventsQueryTemplate().where(event.id.eq(eventId)).fetchOne();
+    }
+
     private JPAQuery<EventFullDto> getEventsQueryTemplate() {
-        JPAQuery<EventFullDto> eventsQuery = queryFactory.select(Projections.constructor(EventFullDto.class,
+        return queryFactory.select(Projections.constructor(EventFullDto.class,
                                 event.id,
                                 Projections.constructor(UserShortDto.class,
                                         user.id,
@@ -95,6 +145,5 @@ public class EventFullPresentRepositoryImpl implements EventFullPresentRepositor
                 .leftJoin(request).on(request.event.id.eq(event.id)
                         .and(request.status.eq(RequestStatus.CONFIRMED)))
                 .groupBy(event.id, user.id, category.id, location.locationId.lat, location.locationId.lon);
-        return eventsQuery;
     }
 }

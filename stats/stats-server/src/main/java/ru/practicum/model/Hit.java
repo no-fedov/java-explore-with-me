@@ -18,11 +18,11 @@ public class Hit {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "fk_app")
+    @JoinColumn(name = "fk_app", nullable = false)
     private Application app;
 
     @ManyToOne
-    @JoinColumn(name = "fk_ip")
+    @JoinColumn(name = "fk_ip", nullable = false)
     private IPAddress ip;
     private String uri;
     private LocalDateTime time;

@@ -13,13 +13,10 @@ import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.URLParameterEventAdmin;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.service.EventAdminService;
+import ru.practicum.stat.adapter.StatAdapter;
 
-import java.net.URLDecoder;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @RequiredArgsConstructor
 @RestController
@@ -30,6 +27,7 @@ public class EventAdminController {
     private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
     private final EventAdminService eventAdminService;
+    private final StatAdapter statAdapter;
 
     @GetMapping
     public List<EventFullDto> getEvents(@RequestParam(defaultValue = "") List<Long> users,
@@ -48,14 +46,18 @@ public class EventAdminController {
                 .page(PageConstructor.getPage(from, size))
                 .build();
         parameters.checkValid();
-        log.info("GET /admin/events with parameters = {}",parameters);
-        return eventAdminService.getEvents(parameters);
+        log.info("GET /admin/events with parameters = {}", parameters);
+        List<EventFullDto> events = eventAdminService.getEvents(parameters);
+        statAdapter.setStatsForEvent(events);
+        return events;
     }
 
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(@PathVariable Long eventId,
                                     @Valid @RequestBody UpdateEventAdminRequest eventDto) {
         log.info("PATCH /admin/events/{eventId} eventId = {} body = {}", eventId, eventDto);
-        return eventAdminService.updateEvent(eventId, eventDto);
+        EventFullDto eventFullDto = eventAdminService.updateEvent(eventId, eventDto);
+        statAdapter.setStatsForEvent(List.of(eventFullDto));
+        return eventFullDto;
     }
 }
