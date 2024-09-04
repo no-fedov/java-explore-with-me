@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.controller.PageConstructor;
@@ -26,33 +27,24 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Validated
 @Slf4j
 public class EventAdminController {
-    private static final DateTimeFormatter timeFormat = DateTimeFormatter
-            .ofPattern(URLDecoder.decode("yyyy-MM-dd HH:mm:ss", UTF_8));
+    private static final String timeFormat = "yyyy-MM-dd HH:mm:ss";
 
     private final EventAdminService eventAdminService;
 
     @GetMapping
     public List<EventFullDto> getEvents(@RequestParam(defaultValue = "") List<Long> users,
-                                        @RequestParam(required = false) List<String> states,
-                                        @RequestParam(required = false) List<Long> categories,
-                                        @RequestParam(required = false) String rangeStart,
-                                        @RequestParam(required = false) String rangeEnd,
+                                        @RequestParam(defaultValue = "") List<String> states,
+                                        @RequestParam(defaultValue = "") List<Long> categories,
+                                        @RequestParam(required = false) @DateTimeFormat(pattern = timeFormat) LocalDateTime rangeStart,
+                                        @RequestParam(required = false) @DateTimeFormat(pattern = timeFormat) LocalDateTime rangeEnd,
                                         @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                         @Positive @RequestParam(defaultValue = "10") Integer size) {
-        LocalDateTime startTime = null;
-        if (rangeStart != null) {
-            startTime = LocalDateTime.parse(rangeStart, timeFormat);
-        }
-        LocalDateTime endTime = null;
-        if (rangeEnd != null) {
-            endTime = LocalDateTime.parse(rangeEnd, timeFormat);
-        }
         URLParameterEventAdmin parameters = URLParameterEventAdmin.builder()
-                .users(users != null ? users : List.of())
-                .states(states != null ? states : List.of())
-                .categories(categories != null ? categories : List.of())
-                .rangeStart(startTime)
-                .rangeEnd(endTime)
+                .users(users)
+                .states(states)
+                .categories(categories)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
                 .page(PageConstructor.getPage(from, size))
                 .build();
         parameters.checkValid();
