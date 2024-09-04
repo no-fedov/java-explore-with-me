@@ -15,7 +15,9 @@ import ru.practicum.repository.CompilationRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.service.CompilationServer;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -26,7 +28,12 @@ public class CompilationServerImp implements CompilationServer {
 
     @Override
     public CompilationDto addCompilation(NewCompilationDto newCompilationDto) {
-        List<Event> currentEvents = eventRepository.findAllById(newCompilationDto.getEvents());
+        Set<Event> currentEvents = null;
+
+        if (newCompilationDto.getEvents() != null) {
+            currentEvents = new HashSet<>(eventRepository.findAllById(newCompilationDto.getEvents()));
+        }
+
         Compilation newCompilation = CompilationMapper.convertFromNewCompilationDto(newCompilationDto, currentEvents);
         compilationRepository.save(newCompilation);
         CompilationDto compilationDto = CompilationMapper.convertToCompilationDtoFromCompilation(newCompilation);
@@ -64,7 +71,10 @@ public class CompilationServerImp implements CompilationServer {
     @Override
     public CompilationDto updateCompilation(Long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation currentCompilation = findById(compId);
-        List<Event> eventsForCompilation = eventRepository.findAllById(updateCompilationRequest.getEvents());
+        Set<Event> eventsForCompilation = null;
+        if (updateCompilationRequest.getEvents() != null) {
+            eventsForCompilation = new HashSet<>(eventRepository.findAllById(updateCompilationRequest.getEvents()));
+        }
         CompilationMapper.convertToCompilationFromUpdateDto(currentCompilation, updateCompilationRequest, eventsForCompilation);
         compilationRepository.save(currentCompilation);
         return CompilationMapper.convertToCompilationDtoFromCompilation(currentCompilation);

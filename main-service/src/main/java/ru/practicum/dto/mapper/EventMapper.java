@@ -13,6 +13,8 @@ import ru.practicum.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ru.practicum.dto.mapper.CategoryMapper.categoryDtoFromCategory;
 import static ru.practicum.dto.mapper.CategoryMapper.categoryFromCategoryDto;
@@ -101,6 +103,10 @@ public class EventMapper {
 
     public static List<EventShortDto> convertToListEventDto(List<Event> list) {
         return list.stream().map(EventMapper::eventDtoFromEvent).toList();
+    }
+
+    public static Set<EventShortDto> convertToSetEventDto(Set<Event> set) {
+        return set.stream().map(EventMapper::eventDtoFromEvent).collect(Collectors.toSet());
     }
 
     public static Event convertToUpdatedEventDtoFromEventAndUpdateEventAdmin(Event event,

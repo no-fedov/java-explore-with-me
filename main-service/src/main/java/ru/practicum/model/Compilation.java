@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "compilations")
@@ -20,7 +21,7 @@ public class Compilation {
     @ManyToMany
     @JoinTable(joinColumns = @JoinColumn(name = "compilation_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id"))
-    private List<Event> events;
-    private Boolean pinned;
+    private Set<Event> events;
+    private boolean pinned;
     private String title;
 }

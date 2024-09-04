@@ -9,23 +9,24 @@ import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 
 import java.util.List;
+import java.util.Set;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CompilationMapper {
-    public static Compilation convertFromNewCompilationDto(NewCompilationDto newCompilationDto, List<Event> eventList) {
+    public static Compilation convertFromNewCompilationDto(NewCompilationDto newCompilationDto, Set<Event> eventList) {
         return Compilation.builder()
                 .title(newCompilationDto.getTitle())
                 .events(eventList)
-                .pinned(newCompilationDto.getPinned())
+                .pinned(newCompilationDto.isPinned())
                 .build();
     }
 
     public static CompilationDto convertToCompilationDtoFromCompilation(Compilation compilation) {
         return CompilationDto.builder()
                 .id(compilation.getId())
-                .pinned(compilation.getPinned())
+                .pinned(compilation.isPinned())
                 .title(compilation.getTitle())
-                .events(EventMapper.convertToListEventDto(compilation.getEvents()))
+                .events(compilation.getEvents() == null ? null : EventMapper.convertToSetEventDto(compilation.getEvents()))
                 .build();
     }
 
@@ -35,7 +36,7 @@ public class CompilationMapper {
 
     public static Compilation convertToCompilationFromUpdateDto(Compilation compilation,
                                                                 UpdateCompilationRequest updateCompilationRequest,
-                                                                List<Event> events) {
+                                                                Set<Event> events) {
         if (updateCompilationRequest.getPinned() != null) {
             compilation.setPinned(updateCompilationRequest.getPinned());
         }
