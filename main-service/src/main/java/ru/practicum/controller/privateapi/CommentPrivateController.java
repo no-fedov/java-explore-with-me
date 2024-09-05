@@ -13,13 +13,13 @@ import ru.practicum.dto.comment.NewCommentDto;
 import ru.practicum.service.CommentService;
 
 @RestController
-@RequestMapping("/users/{userId}/comments/{eventId}")
+@RequestMapping("/users/{userId}/comments")
 @RequiredArgsConstructor
 @Validated
 public class CommentPrivateController {
     private final CommentService commentService;
 
-    @PostMapping
+    @PostMapping("/{eventId}")
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDto createComment(@PositiveOrZero @PathVariable Long userId,
                                     @PositiveOrZero @PathVariable Long eventId,
@@ -28,20 +28,22 @@ public class CommentPrivateController {
         return createdComment;
     }
 
-    @PatchMapping
+    @PatchMapping("/{eventId}")
     public CommentStatusUpdateResult decisionComments(@PositiveOrZero @PathVariable Long userId,
                                                       @PositiveOrZero @PathVariable Long eventId,
                                                       @Valid @RequestBody CommentStatusUpdateRequest commentStatusUpdateRequest) {
         CommentStatusUpdateResult decision = commentService.decisionComments(userId, eventId, commentStatusUpdateRequest);
-        return null;
+        return decision;
     }
 
-//    @GetMapping
-//    public List<Comment> getAllComments() {
-//        return commentService.getAllComments();
-//    }
-//    // Получение комментария по id
-//
+    @DeleteMapping("/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteComment(@PositiveOrZero @PathVariable Long userId,
+                              @PositiveOrZero @PathVariable Long commentId) {
+        commentService.deleteComment(userId, commentId);
+    }
+
+
 //    @GetMapping("/{id}")
 //    public ResponseEntity<Comment> getCommentById(@PathVariable Long id) {
 //        Comment comment = commentService.getCommentById(id);
@@ -51,18 +53,7 @@ public class CommentPrivateController {
 //            return ResponseEntity.notFound().build();
 //        }
 //    }
-//    // Создание нового комментария
-//
-//    // Обновление комментария
-//    @PutMapping("/{id}")
-//    public ResponseEntity<Comment> updateComment(@PathVariable Long id, @RequestBody Comment updatedComment) {
-//        Comment comment = commentService.updateComment(id, updatedComment);
-//        if (comment != null) {
-//            return ResponseEntity.ok(comment);
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
+
 //
 //    // Удаление комментария
 //    @DeleteMapping("/{id}")

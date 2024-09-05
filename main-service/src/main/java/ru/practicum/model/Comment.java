@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Setter
 @Getter
+@Table(name = "comments")
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +28,8 @@ public class Comment {
     @JoinColumn(name = "fk_event")
     private Event event;
     private String description;
+    @Column(name = "publishedOn")
     private LocalDateTime publishedOn;
-    private LocalDateTime updatedOn;
+    @Enumerated(EnumType.STRING)
     private CommentStatus status;
 }
