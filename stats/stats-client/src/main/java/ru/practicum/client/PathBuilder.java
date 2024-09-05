@@ -25,12 +25,12 @@ public class PathBuilder {
     }
 
     public static String buildPath(Map<String, Object> parameters) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("?");
+        StringBuilder path = new StringBuilder();
+        path.append("?");
         for (String key : parameters.keySet()) {
-            stringBuilder.append(key).append("={").append(key).append("}").append("&");
+            path.append(key).append("={").append(key).append("}").append("&");
         }
-        return stringBuilder.substring(0, stringBuilder.capacity() - 1);
+        return path.substring(0, path.length() - 1);
     }
 
     private static String convertTimeToString(LocalDateTime time) {

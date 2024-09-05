@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.URLParameter;
 import ru.practicum.dto.ViewStats;
+import ru.practicum.exception.NoValidParameterException;
 import ru.practicum.service.HitService;
 
 import java.net.URLDecoder;
@@ -37,6 +38,10 @@ public class HitController {
                                         @RequestParam(defaultValue = "false") Boolean unique) {
         LocalDateTime startTime = LocalDateTime.parse(start, timeFormat);
         LocalDateTime endTime = LocalDateTime.parse(end, timeFormat);
+
+        if (startTime.isAfter(endTime)) {
+            throw new NoValidParameterException("Невалидные параметры времени");
+        }
 
         if (uris == null) {
             uris = List.of();
