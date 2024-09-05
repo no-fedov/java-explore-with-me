@@ -24,6 +24,7 @@ import ru.practicum.service.RequestService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static ru.practicum.dto.mapper.RequestMapper.convertToRequestDto;
 import static ru.practicum.dto.mapper.RequestMapper.convertToRequestFromEventAndUser;
@@ -145,12 +146,10 @@ public class RequestServiceImp implements RequestService {
             throw new EventActionException("Нельзя участвовать в неопубликованном событии");
         }
 
-        Optional<Request> request = requestRepository.findByRequester_IdAndEvent_Id(currentUser.getId(), currentEvent.getId());
+        Optional<Request> request = requestRepository
+                .findByRequester_IdAndEvent_IdAndStatusIn(currentUser.getId(), currentEvent.getId(), Set.of(RequestStatus.PENDING, RequestStatus.CONFIRMED));
         if (request.isPresent()) {
-            if (request.get().getStatus() == RequestStatus.PENDING
-                    || request.get().getStatus() == RequestStatus.CONFIRMED) {
-                throw new RequestActionException("Нельзя добавить повторный запрос");
-            }
+            throw new RequestActionException("Нельзя добавить повторный запрос");
         }
 
         Long participants = requestRepository
