@@ -1,5 +1,6 @@
 package ru.practicum.dto.comment;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class CommentDto {
     private Long eventId;
     private UserShortDto user;
     private String description;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime publishedOn;
-    private LocalDateTime updatedOn;
     private CommentStatus status;
 }

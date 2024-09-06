@@ -54,15 +54,4 @@ public class CommentPrivateController {
 //        }
 //    }
 
-//
-//    // Удаление комментария
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
-//        boolean deleted = commentService.deleteComment(id);
-//        if (deleted) {
-//            return ResponseEntity.noContent().build();
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
 }

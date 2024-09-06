@@ -15,6 +15,7 @@ import ru.practicum.model.Request;
 import ru.practicum.model.User;
 import ru.practicum.model.status.CommentStatus;
 import ru.practicum.model.status.RequestStatus;
+import ru.practicum.model.status.StateEvent;
 import ru.practicum.repository.CommentRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.RequestRepository;
@@ -39,10 +40,26 @@ public class CommentServiceImp implements CommentService {
     @Override
     public CommentDto createComment(Long userId, Long eventId, NewCommentDto comment) {
         User currentUser = getCurrentUser(userId);
-        getCurrentEvent(eventId);
-        getCurrentRequest(userId, eventId);
+        Event currentEvent = getCurrentEvent(eventId);
+
+        if (currentEvent.getState() != StateEvent.PUBLISHED) {
+            throw new CommentActionException("Нельзя комментировать неопубликованные события");
+        }
+
+        CommentStatus status = null;
+        LocalDateTime publishedTime = null;
+
+        if (currentEvent.getInitiator().getId().equals(currentUser.getId())) {
+            status = CommentStatus.APPROVED;
+            publishedTime = LocalDateTime.now();
+        } else {
+            getCurrentRequest(userId, eventId);
+            status = CommentStatus.PENDING;
+        }
+
         Comment newComment = CommentMapper.convertToCommentFromNewCommentDto(comment);
-        newComment.setStatus(CommentStatus.PENDING);
+        newComment.setStatus(status);
+        newComment.setPublishedOn(publishedTime);
         commentRepository.save(newComment);
         return CommentMapper.convertToCommentDtoFromComment(eventId, currentUser, newComment);
     }
