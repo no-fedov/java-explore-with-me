@@ -1,6 +1,9 @@
 package ru.practicum.service.imp;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.comment.CommentStatusUpdateRequest;
@@ -24,6 +27,7 @@ import ru.practicum.service.CommentService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +36,7 @@ import static ru.practicum.dto.comment.CommentStatusUpdateRequest.Status.APPROVE
 @Service
 @RequiredArgsConstructor
 public class CommentServiceImp implements CommentService {
+    private static final Logger log = LoggerFactory.getLogger(CommentServiceImp.class);
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
@@ -57,11 +62,14 @@ public class CommentServiceImp implements CommentService {
             status = CommentStatus.PENDING;
         }
 
-        Comment newComment = CommentMapper.convertToCommentFromNewCommentDto(comment);
+        Comment newComment = CommentMapper.convertToCommentFromNewCommentDto(comment, currentUser, currentEvent);
+
         newComment.setStatus(status);
         newComment.setPublishedOn(publishedTime);
         commentRepository.save(newComment);
-        return CommentMapper.convertToCommentDtoFromComment(eventId, currentUser, newComment);
+        CommentDto addedCommentDto = CommentMapper.convertToCommentDtoFromComment(eventId, currentUser, newComment);
+        log.info("Добавлен комментарий: {}", addedCommentDto);
+        return addedCommentDto;
     }
 
     @Override
@@ -96,15 +104,55 @@ public class CommentServiceImp implements CommentService {
         } else {
             commentRepository.rejectComment(commentsIds);
         }
-        return CommentMapper.concertToUpdatedResult(comments);
+        CommentStatusUpdateResult commentStatusUpdateResult = CommentMapper.concertToUpdatedResult(comments);
+        log.info("Принято решение по следующим комментариям: {}\nРезультат: {}", commentStatusUpdateResult, commentStatusUpdateResult);
+        return commentStatusUpdateResult;
     }
 
     @Override
-    public void deleteComment(Long userId, Long commentId) {
+    public void deleteComment(Long userId, Long eventId, Long commentId) {
         getCurrentUser(userId);
+        getCurrentEvent(eventId);
         Comment currentComment = commentRepository.findCommentForEventInitiatorOrAuthor(userId, commentId)
-                .orElseThrow(() -> new CommentActionException("Ошибка при удалении комментария"));
-        commentRepository.delete(currentComment);
+                .orElseThrow(() -> new CommentActionException("Комментарий может удалить только инициатор события" +
+                        " или автор комментария"));
+        commentRepository.deleteById(commentId);
+        log.info("Выполнено удаление комментария: {}", currentComment);
+    }
+
+    @Override
+    public List<CommentDto> getCommentsByEventId(Long userId, Long eventId, Pageable page) {
+        User currentUser = getCurrentUser(userId);
+        Event currentEvent = getCurrentEvent(eventId);
+        if (!currentUser.getId().equals(currentEvent.getInitiator().getId())) {
+            throw new CommentActionException("Нельзя просмотреть все комментариии если вы не владаелец события");
+        }
+        List<CommentDto> commentsByEventId = commentRepository.getCommentsByEventId(eventId, page);
+        log.info("Найдены комментарии: {}", commentsByEventId);
+        return commentsByEventId;
+    }
+
+    @Override
+    public CommentDto getCommentByIdAndEventId(Long userId, Long eventId, Long commentID) {
+        getCurrentUser(userId);
+        getCurrentEvent(eventId);
+        List<CommentDto> currentComments = commentRepository.getCommentsByIds(Set.of(commentID), eventId);
+
+        if (currentComments.isEmpty()) {
+            throw new NotFoundException("Комментарий не найден");
+        }
+
+        CommentDto currentComment = currentComments.getFirst();
+        log.info("Найден комментарий: {}", currentComment);
+        return currentComment;
+    }
+
+    @Override
+    public CommentDto findCommentById(Long commentId) {
+        CommentDto commentDto = commentRepository.findCommentById(commentId)
+                .orElseThrow(() -> new NotFoundException("Комментарий не существует"));
+        log.info("Найден комментарий по id: {}", commentDto);
+        return commentDto;
     }
 
     private User getCurrentUser(Long userId) {
@@ -123,6 +171,6 @@ public class CommentServiceImp implements CommentService {
     private Request getCurrentRequest(Long userId, Long eventId) {
         return requestRepository.findByRequester_IdAndEvent_IdAndStatusIn(userId, eventId, Set.of(RequestStatus.CONFIRMED))
                 .orElseThrow(() -> new CommentActionException("Пользователь не может оставить комментарий, " +
-                        "так как его заявка на участие на подтверждена"));
+                        "так как у него нет подтвержденных заявок на участие в событии"));
     }
 }

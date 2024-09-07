@@ -1,10 +1,7 @@
 package ru.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.model.status.CommentStatus;
 
 import java.time.LocalDateTime;
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Setter
 @Getter
+@NoArgsConstructor
 @Table(name = "comments")
 public class Comment {
     @Id
@@ -21,11 +19,11 @@ public class Comment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "fk_author")
+    @JoinColumn(name = "fk_author", nullable = false)
     private User author;
 
     @ManyToOne
-    @JoinColumn(name = "fk_event")
+    @JoinColumn(name = "fk_event", nullable = false)
     private Event event;
     private String description;
     @Column(name = "publishedOn")

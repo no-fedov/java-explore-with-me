@@ -6,14 +6,17 @@ import ru.practicum.dto.comment.CommentDto;
 import ru.practicum.dto.comment.CommentStatusUpdateResult;
 import ru.practicum.dto.comment.NewCommentDto;
 import ru.practicum.model.Comment;
+import ru.practicum.model.Event;
 import ru.practicum.model.User;
 
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommentMapper {
-    public static Comment convertToCommentFromNewCommentDto(NewCommentDto dto) {
+    public static Comment convertToCommentFromNewCommentDto(NewCommentDto dto, User user, Event event) {
         return Comment.builder()
+                .author(user)
+                .event(event)
                 .description(dto.getDescription())
                 .build();
     }
