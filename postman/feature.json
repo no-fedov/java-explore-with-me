@@ -189,12 +189,6 @@
 									"        let event = await api.addEvent(user1.id, rnd.getEvent(category.id));\r",
 									"        pm.collectionVariables.set(\"eventId\", event.id);\r",
 									"        const comment = rnd.getComment();\r",
-									"       \r",
-									"        pm.request.body.update({\r",
-									"            mode: 'raw',\r",
-									"            raw: JSON.stringify(comment),\r",
-									"            options: { raw: { language: 'json' } }\r",
-									"        }); \r",
 									"    } catch(err) {\r",
 									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
 									"    }\r",
@@ -235,6 +229,15 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"description\": \"dsgsdgsdgsdgsdgdsgsdgsdgsdgg\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{baseUrl}}/users/:userId/event/:eventId/comments",
 							"host": [
@@ -282,12 +285,6 @@
 							"        pm.collectionVariables.set(\"eventId\", event.id);\r",
 							"        event = await api.publishEvent(event.id);\r",
 							"        const comment = rnd.getComment();\r",
-							"       \r",
-							"        pm.request.body.update({\r",
-							"            mode: 'raw',\r",
-							"            raw: JSON.stringify(comment),\r",
-							"            options: { raw: { language: 'json' } }\r",
-							"        }); \r",
 							"    } catch(err) {\r",
 							"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
 							"    }\r",
@@ -347,6 +344,15 @@
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"description\": \"dsfdsgdsgsdgdsggdwsgdsgsdgsdgsdgsdg\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "{{baseUrl}}/users/:userId/event/:eventId/comments",
 					"host": [
