@@ -36,17 +36,6 @@ public class CommentPrivateController {
         return createdComment;
     }
 
-    @PatchMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public CommentStatusUpdateResult decisionComments(@PositiveOrZero @PathVariable Long userId,
-                                                      @PositiveOrZero @PathVariable Long eventId,
-                                                      @Valid @RequestBody CommentStatusUpdateRequest commentStatusUpdateRequest) {
-        CommentStatusUpdateResult decision = commentService.decisionComments(userId, eventId, commentStatusUpdateRequest);
-        log.info("PATCH /users/{userId}/event/{eventId}/comments userId = {} eventId = {} patchedComment = {}", userId,
-                eventId, decision);
-        return decision;
-    }
-
     @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PositiveOrZero @PathVariable Long userId,

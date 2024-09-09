@@ -14,7 +14,6 @@ import ru.practicum.exception.CommentActionException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Comment;
 import ru.practicum.model.Event;
-import ru.practicum.model.Request;
 import ru.practicum.model.User;
 import ru.practicum.model.status.CommentStatus;
 import ru.practicum.model.status.RequestStatus;
@@ -57,7 +56,10 @@ public class CommentServiceImp implements CommentService {
             status = CommentStatus.APPROVED;
             publishedTime = LocalDateTime.now();
         } else {
-            getCurrentRequest(userId, eventId);
+            if (!hasConfirmedRequest(userId, eventId)) {
+                throw new CommentActionException("Пользователь не может оставить комментарий, " +
+                        "так как у него нет подтвержденных заявок на участие в событии");
+            }
             status = CommentStatus.PENDING;
         }
 
@@ -72,11 +74,9 @@ public class CommentServiceImp implements CommentService {
     }
 
     @Override
-    public CommentStatusUpdateResult decisionComments(Long userId,
-                                                      Long eventId,
+    public CommentStatusUpdateResult decisionComments(Long eventId,
                                                       CommentStatusUpdateRequest commentStatusUpdateRequest) {
-        getCurrentUser(userId);
-        getCurrentEventForInitiator(userId, eventId);
+        getCurrentEvent(eventId);
 
         List<CommentDto> comments = commentRepository.getCommentsByIds(commentStatusUpdateRequest.getIds(), eventId);
 
@@ -162,14 +162,9 @@ public class CommentServiceImp implements CommentService {
         return eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Такого события нет"));
     }
 
-    private Event getCurrentEventForInitiator(Long userId, Long eventId) {
-        return eventRepository.findByIdAndInitiator_Id(eventId, userId)
-                .orElseThrow(() -> new NotFoundException("У пользователя нет такого события"));
-    }
-
-    private Request getCurrentRequest(Long userId, Long eventId) {
-        return requestRepository.findByRequester_IdAndEvent_IdAndStatusIn(userId, eventId, Set.of(RequestStatus.CONFIRMED))
-                .orElseThrow(() -> new CommentActionException("Пользователь не может оставить комментарий, " +
-                        "так как у него нет подтвержденных заявок на участие в событии"));
+    private boolean hasConfirmedRequest(Long userId, Long eventId) {
+        return requestRepository.existsByRequester_IdAndEvent_IdAndStatusIn(userId,
+                eventId,
+                Set.of(RequestStatus.CONFIRMED));
     }
 }

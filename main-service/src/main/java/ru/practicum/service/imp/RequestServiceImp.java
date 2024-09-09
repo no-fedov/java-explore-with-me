@@ -23,7 +23,6 @@ import ru.practicum.repository.UserRepository;
 import ru.practicum.service.RequestService;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static ru.practicum.dto.mapper.RequestMapper.convertToRequestDto;
@@ -146,9 +145,9 @@ public class RequestServiceImp implements RequestService {
             throw new EventActionException("Нельзя участвовать в неопубликованном событии");
         }
 
-        Optional<Request> request = requestRepository
-                .findByRequester_IdAndEvent_IdAndStatusIn(currentUser.getId(), currentEvent.getId(), Set.of(RequestStatus.PENDING, RequestStatus.CONFIRMED));
-        if (request.isPresent()) {
+        if (requestRepository.existsByRequester_IdAndEvent_IdAndStatusIn(currentUser.getId(),
+                currentEvent.getId(),
+                Set.of(RequestStatus.PENDING, RequestStatus.CONFIRMED))) {
             throw new RequestActionException("Нельзя добавить повторный запрос");
         }
 

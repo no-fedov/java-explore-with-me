@@ -793,22 +793,17 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/users/:userId/event/:eventId/comments",
+					"raw": "{{baseUrl}}/admin/comments/event/:eventId",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
-						"users",
-						":userId",
+						"admin",
+						"comments",
 						"event",
-						":eventId",
-						"comments"
+						":eventId"
 					],
 					"variable": [
-						{
-							"key": "userId",
-							"value": "{{userId}}"
-						},
 						{
 							"key": "eventId",
 							"value": "{{eventId}}"
