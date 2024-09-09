@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.comment.CommentDto;
-import ru.practicum.dto.comment.CommentStatusUpdateRequest;
-import ru.practicum.dto.comment.CommentStatusUpdateResult;
 import ru.practicum.dto.comment.NewCommentDto;
 import ru.practicum.service.CommentService;
 
