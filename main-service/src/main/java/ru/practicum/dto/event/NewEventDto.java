@@ -46,7 +46,6 @@ public class NewEventDto {
     @NotNull
     private LocationDto location;
 
-
     private boolean paid;
     @Builder.Default
     private boolean requestModeration = true;

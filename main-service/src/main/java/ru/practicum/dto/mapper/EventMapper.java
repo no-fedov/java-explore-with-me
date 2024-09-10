@@ -155,6 +155,8 @@ public class EventMapper {
                 .location(locationDtoFromLocation(event.getLocation()))
                 .createdOn(event.getCreatedOn())
                 .eventDate(event.getTime())
+                .publishedOn(event.getPublishedOn())
+                .views(0L)
                 .build();
     }
 }

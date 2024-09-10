@@ -58,7 +58,8 @@ public class ExceptionController {
     }
 
     @ExceptionHandler({EventActionException.class, RequestActionException.class,
-            CategoryActionException.class, UserActionException.class, IllegalArgumentException.class})
+            CategoryActionException.class, UserActionException.class, IllegalArgumentException.class,
+            CommentActionException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleClientException(RuntimeException e) {
         log.debug("Получен статус 409 CLIENT_ERROR {}", e.getMessage());
